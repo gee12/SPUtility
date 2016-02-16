@@ -1,0 +1,89 @@
+﻿<Window x:Class="SPLib.SPSettingsForm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SPLib"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             xmlns:ports="clr-namespace:System.IO.Ports;assembly=System"
+             WindowStartupLocation="CenterOwner" ResizeMode="NoResize" 
+             Title="Настройка COM-порта"
+             x:Name="_this" SizeToContent="WidthAndHeight" Width="200" Icon="ico.ico">
+    <Window.Resources>
+        <Image x:Key="accept_32" Source="Resources/accept_32.png"/>
+        <Image x:Key="cancel_32" Source="Resources/cancel_32.png"/>
+        <!---->
+        <ObjectDataProvider x:Key="parityValues" MethodName="GetValues"
+                            ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="ports:Parity"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <!---->
+        <ObjectDataProvider x:Key="stopBitsValues" MethodName="GetValues"
+                            ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="ports:StopBits"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+    
+    <Window.CommandBindings>
+        <CommandBinding Command="local:AppCommands.TestCommand" Executed="CommandBinding_Executed" />
+    </Window.CommandBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!---->
+        <!--<Grid Margin="10" x:Name="gMain" DataContext="{Binding ElementName=_this, Path=SerialPort, Mode=TwoWay}">-->
+        <Grid Margin="10" x:Name="gMain" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="28"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <!---->
+            <Label Content="Порт:" />
+            <Label Content="Бит/сек:"   Grid.Row="1"/>
+            <Label Content="Биты:"          Grid.Row="2"/>
+            <Label Content="Стоп.биты:"     Grid.Row="3"/>
+            <Label Content="Четность:"      Grid.Row="4"/>
+
+            <!---->
+            <ComboBox x:Name="cbPort"       Margin="0,2" Grid.Column="1"
+                      ItemsSource="{Binding Source={x:Static local:Utils.Ports}}" SelectedItem="{Binding PortName, Mode=TwoWay}" />
+            <ComboBox x:Name="cbBaudRate"   Margin="0,2" Grid.Column="1" Grid.Row="1"
+                      ItemsSource="{Binding Source={x:Static local:Utils.BaudRates}}" SelectedItem="{Binding BaudRate, Mode=TwoWay}"/>
+            <ComboBox x:Name="cbDataBits"   Margin="0,2" Grid.Column="1" Grid.Row="2"
+                      ItemsSource="{Binding Source={x:Static local:Utils.DataBits}}" SelectedItem="{Binding DataBits, Mode=TwoWay}"/>
+            <ComboBox x:Name="cbStopBits"   Margin="0,2" Grid.Column="1" Grid.Row="3"
+                       ItemsSource="{Binding Source={StaticResource stopBitsValues}}" SelectedItem="{Binding StopBits, Mode=TwoWay}"/>
+            <ComboBox x:Name="cbParity"     Margin="0,2" Grid.Column="1" Grid.Row="4"
+                       ItemsSource="{Binding Source={StaticResource parityValues}}" SelectedItem="{Binding Parity, Mode=TwoWay}"/>
+        </Grid>
+
+
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Background="LightGray">
+
+            <Button x:Name="bApply" Height="40" Width="40" ToolTip="Сохранить (Ctrl+Enter)"
+                    Margin="10" Content="{StaticResource accept_32}" />
+            <Button x:Name="bCancel" Height="40" Width="40" ToolTip="Отмена (Esc)"
+                    Margin="0,10,10,10" Content="{StaticResource cancel_32}" />
+            <Button x:Name="bTest" Height="30" Width="50" ToolTip="Отмена (Esc)" Command="local:AppCommands.TestCommand"
+                    Margin="20,10,10,10" Content="Тест" HorizontalAlignment="Left" />
+
+        </StackPanel>
+
+        <local:CircularProgressBar x:Name="pbCircular" Visibility="Collapsed"/>
+        
+    </Grid>
+</Window>
