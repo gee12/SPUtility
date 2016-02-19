@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -10,39 +11,6 @@ namespace SPLib
 {
     public class Utils
     {
-        public static string[] Ports =
-        {
-            "COM1",
-            "COM2",
-            "COM3",
-            "COM4",
-            "COM5",
-            "COM6",
-            "COM7",
-            "COM8",
-        };
-
-        public static int[] BaudRates = 
-        {
-            300,
-            600,
-            1200,
-            2400,
-            4800,
-            9600,
-            14400,
-            28800,
-            36000,
-            115000
-        };
-
-        public static int[] DataBits =
-        {
-            7, 
-            8, 
-            9
-        };
-
         /// <summary>
         /// 
         /// </summary>
@@ -87,5 +55,27 @@ namespace SPLib
             }
         }
 
+        public static byte[] ToByteHexArray(string hex)
+        {
+            return Enumerable.Range(0, hex.Length)
+                             .Where(x => x % 2 == 0)
+                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                             .ToArray();
+        }
+
+        public static byte[] ToByteHexArray(string hex, string separ)
+        {
+            var hexes = hex.Split(new [] {separ}, StringSplitOptions.RemoveEmptyEntries);
+            return hexes.Select(x => Convert.ToByte(x, 16))
+                             .ToArray();
+        }
+
+        public static string ToString(byte[] bytes)
+        {
+            StringBuilder hex = new StringBuilder(bytes.Length * 2);
+            foreach (byte b in bytes)
+                hex.AppendFormat("{0:X2} ", b);
+            return hex.ToString();
+        }
     }
 }

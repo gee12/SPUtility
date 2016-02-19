@@ -26,50 +26,99 @@ namespace SPLib
         public SPSettingsForm()
         {
             InitializeComponent();
-
-            SerialPort = new SerialPort();
-            SerialPort.PortName = Utils.Ports[0];
-            SerialPort.BaudRate = Utils.BaudRates[0];
-            SerialPort.DataBits = Utils.DataBits[0];
-            //SerialPort.StopBits = StopBits.None;
-            SerialPort.Parity = Parity.None;
-
-            gMain.DataContext = SerialPort;
             //ItemsSource = Enum.GetValues(typeof(EffectStyle)).Cast<EffectStyle>();
-        }
-
-        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            var command = e.Command;
-            if (AppCommands.TestCommand.Equals(command))
-            {
-                Test();
-            }
-        }
-
-        void Test()
-        {
-            new TestTask().Start(this, this.Dispatcher, "");
         }
 
         /// <summary>
         /// 
         /// </summary>
-        class TestTask : Utils.AsyncTask<SPSettingsForm, String, String>
+        private void CommandBinding_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            var command = e.Command;
+            if (AppCommands.ApplyCommand.Equals(command))
+            {
+                Close(true);
+            }
+            else if (AppCommands.CancelCommand.Equals(command))
+            {
+                Close(false);
+            }
+            else if (AppCommands.TestCommand.Equals(command))
+            {
+                Test();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool ShowModal(SerialPort port = null)
+        {
+            Init(port);
+
+           return base.ShowDialog().GetValueOrDefault();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Init(SerialPort port)
+        {
+            if (port == null)
+            {
+                SerialPort = new SerialPort();
+                SerialPort.PortName = SPConnection.Ports[0];
+                SerialPort.BaudRate = SPConnection.BaudRates[0];
+                SerialPort.DataBits = SPConnection.DataBits[0];
+                //SerialPort.StopBits = StopBits.None;
+                SerialPort.Parity = Parity.None;
+            }
+            else SerialPort = port;
+            gMain.DataContext = SerialPort;
+        }
+
+        void Close(bool result)
+        {
+            this.DialogResult = result;
+            Close();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void Test()
+        {
+            SerialPort test = SPConnection.ClonePort(this.SerialPort);
+            new TestTask().Start(this, this.Dispatcher, test);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        class TestTask : Utils.AsyncTask<SPSettingsForm, SerialPort, bool>
         {
             protected override void pre(SPSettingsForm form)
             {
                 form.pbCircular.Visibility = Visibility.Visible;
             }
 
-            protected override string run(string param)
+            protected override bool run(SerialPort port)
             {
-                return "";
+                bool res = false;
+                try
+                {
+                    port.Open();
+                    res = port.IsOpen;
+                    port.Close();
+                }
+                catch {}
+                return res;
             }
 
-            protected override void post(SPSettingsForm form, string res)
+            protected override void post(SPSettingsForm form, bool res)
             {
                 form.pbCircular.Visibility = Visibility.Collapsed;
+                MessageBoxes.SerialPortTest(res);
             }
         }
     }

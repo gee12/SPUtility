@@ -2,7 +2,10 @@ D:\Projects\SPUtility\SPLib\bin\Debug\SPLib.dll
 D:\Projects\SPUtility\SPLib\bin\Debug\SPLib.pdb
 D:\Projects\SPUtility\TestApp\bin\Debug\SPLib.dll
 D:\Projects\SPUtility\TestApp\bin\Debug\SPLib.pdb
+D:\Projects\SPUtility\SPLib\obj\Debug\CircularProgressBar.baml
+D:\Projects\SPUtility\SPLib\obj\Debug\CircularProgressBar.g.cs
 D:\Projects\SPUtility\SPLib\obj\Debug\SPSettingsForm.g.cs
+D:\Projects\SPUtility\SPLib\obj\Debug\GeneratedInternalTypeHelper.g.cs
 D:\Projects\SPUtility\SPLib\obj\Debug\SPLib_MarkupCompile.cache
 D:\Projects\SPUtility\SPLib\obj\Debug\SPLib_MarkupCompile.lref
 D:\Projects\SPUtility\SPLib\obj\Debug\SPSettingsForm.baml
@@ -11,6 +14,3 @@ D:\Projects\SPUtility\SPLib\obj\Debug\SPLib.Properties.Resources.resources
 D:\Projects\SPUtility\SPLib\obj\Debug\SPLib.csproj.GenerateResource.Cache
 D:\Projects\SPUtility\SPLib\obj\Debug\SPLib.dll
 D:\Projects\SPUtility\SPLib\obj\Debug\SPLib.pdb
-D:\Projects\SPUtility\SPLib\obj\Debug\CircularProgressBar.baml
-D:\Projects\SPUtility\SPLib\obj\Debug\CircularProgressBar.g.cs
-D:\Projects\SPUtility\SPLib\obj\Debug\GeneratedInternalTypeHelper.g.cs

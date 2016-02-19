@@ -54,11 +54,15 @@
     <Compile Include="CircularProgressBar.xaml.cs">
       <DependentUpon>CircularProgressBar.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Log.cs" />
+    <Compile Include="MessageBoxes.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ResultCodes.cs" />
+    <Compile Include="SPConnection.cs" />
     <Compile Include="SPSettingsForm.xaml.cs">
       <DependentUpon>SPSettingsForm.xaml</DependentUpon>
     </Compile>

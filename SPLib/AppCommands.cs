@@ -11,11 +11,15 @@ namespace SPLib
     public class AppCommands
     {
         public static RoutedUICommand TestCommand { get; protected set; }
+        public static RoutedUICommand ApplyCommand { get; protected set; }
+        public static RoutedUICommand CancelCommand { get; protected set; }
         
 
         static AppCommands()
         {
             TestCommand = new RoutedUICommand("", "TestCommand", typeof(AppCommands));
+            ApplyCommand = new RoutedUICommand("", "ApplyCommand", typeof(AppCommands));
+            CancelCommand = new RoutedUICommand("", "CancelCommand", typeof(AppCommands));
         }
 
         public static void SetCommandBinding(CommandBindingCollection commandCollection, ICommand command, 

@@ -5,7 +5,7 @@
              xmlns:System="clr-namespace:System;assembly=mscorlib"
              xmlns:ports="clr-namespace:System.IO.Ports;assembly=System"
              WindowStartupLocation="CenterOwner" ResizeMode="NoResize" 
-             Title="Настройка COM-порта"
+             Title="Параметры COM-порта"
              x:Name="_this" SizeToContent="WidthAndHeight" Width="200" Icon="ico.ico">
     <Window.Resources>
         <Image x:Key="accept_32" Source="Resources/accept_32.png"/>
@@ -28,6 +28,8 @@
     
     <Window.CommandBindings>
         <CommandBinding Command="local:AppCommands.TestCommand" Executed="CommandBinding_Executed" />
+        <CommandBinding Command="local:AppCommands.ApplyCommand" Executed="CommandBinding_Executed" />
+        <CommandBinding Command="local:AppCommands.CancelCommand" Executed="CommandBinding_Executed" />
     </Window.CommandBindings>
 
     <Grid>
@@ -60,11 +62,11 @@
 
             <!---->
             <ComboBox x:Name="cbPort"       Margin="0,2" Grid.Column="1"
-                      ItemsSource="{Binding Source={x:Static local:Utils.Ports}}" SelectedItem="{Binding PortName, Mode=TwoWay}" />
+                      ItemsSource="{Binding Source={x:Static local:SPConnection.Ports}}" SelectedItem="{Binding PortName, Mode=TwoWay}" />
             <ComboBox x:Name="cbBaudRate"   Margin="0,2" Grid.Column="1" Grid.Row="1"
-                      ItemsSource="{Binding Source={x:Static local:Utils.BaudRates}}" SelectedItem="{Binding BaudRate, Mode=TwoWay}"/>
+                      ItemsSource="{Binding Source={x:Static local:SPConnection.BaudRates}}" SelectedItem="{Binding BaudRate, Mode=TwoWay}"/>
             <ComboBox x:Name="cbDataBits"   Margin="0,2" Grid.Column="1" Grid.Row="2"
-                      ItemsSource="{Binding Source={x:Static local:Utils.DataBits}}" SelectedItem="{Binding DataBits, Mode=TwoWay}"/>
+                      ItemsSource="{Binding Source={x:Static local:SPConnection.DataBits}}" SelectedItem="{Binding DataBits, Mode=TwoWay}"/>
             <ComboBox x:Name="cbStopBits"   Margin="0,2" Grid.Column="1" Grid.Row="3"
                        ItemsSource="{Binding Source={StaticResource stopBitsValues}}" SelectedItem="{Binding StopBits, Mode=TwoWay}"/>
             <ComboBox x:Name="cbParity"     Margin="0,2" Grid.Column="1" Grid.Row="4"
@@ -74,9 +76,9 @@
 
         <StackPanel Orientation="Horizontal" Grid.Row="1" Background="LightGray">
 
-            <Button x:Name="bApply" Height="40" Width="40" ToolTip="Сохранить (Ctrl+Enter)"
+            <Button x:Name="bApply" Height="40" Width="40" ToolTip="Сохранить (Ctrl+Enter)" Command="local:AppCommands.ApplyCommand"
                     Margin="10" Content="{StaticResource accept_32}" />
-            <Button x:Name="bCancel" Height="40" Width="40" ToolTip="Отмена (Esc)"
+            <Button x:Name="bCancel" Height="40" Width="40" ToolTip="Отмена (Esc)" Command="local:AppCommands.CancelCommand"
                     Margin="0,10,10,10" Content="{StaticResource cancel_32}" />
             <Button x:Name="bTest" Height="30" Width="50" ToolTip="Отмена (Esc)" Command="local:AppCommands.TestCommand"
                     Margin="20,10,10,10" Content="Тест" HorizontalAlignment="Left" />
