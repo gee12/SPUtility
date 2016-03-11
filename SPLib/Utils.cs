@@ -55,7 +55,7 @@ namespace SPLib
             }
         }
 
-        public static byte[] ToByteHexArray(string hex)
+        public static byte[] ToByteArrayFromHex(string hex)
         {
             return Enumerable.Range(0, hex.Length)
                              .Where(x => x % 2 == 0)
@@ -63,14 +63,14 @@ namespace SPLib
                              .ToArray();
         }
 
-        public static byte[] ToByteHexArray(string hex, string separ)
+        public static byte[] ToByteArrayFromHex(string hex, string separ)
         {
             var hexes = hex.Split(new [] {separ}, StringSplitOptions.RemoveEmptyEntries);
             return hexes.Select(x => Convert.ToByte(x, 16))
                              .ToArray();
         }
 
-        public static string ToString(byte[] bytes)
+        public static string ToHexString(byte[] bytes)
         {
             StringBuilder hex = new StringBuilder(bytes.Length * 2);
             foreach (byte b in bytes)

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPLib", "SPLib\SPLib.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{34AD1A7B-F391-455D-B8DF-5FEE42A89B97}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsHubApp", "IsHubApp\IsHubApp.csproj", "{3CACD4B2-FAB5-46FC-9882-4C1A2DAC5FD4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{34AD1A7B-F391-455D-B8DF-5FEE42A89B97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34AD1A7B-F391-455D-B8DF-5FEE42A89B97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34AD1A7B-F391-455D-B8DF-5FEE42A89B97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CACD4B2-FAB5-46FC-9882-4C1A2DAC5FD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CACD4B2-FAB5-46FC-9882-4C1A2DAC5FD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CACD4B2-FAB5-46FC-9882-4C1A2DAC5FD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CACD4B2-FAB5-46FC-9882-4C1A2DAC5FD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
