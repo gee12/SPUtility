@@ -54,6 +54,7 @@
     <Compile Include="CircularProgressBar.xaml.cs">
       <DependentUpon>CircularProgressBar.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Enumeration.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="MessageBoxes.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

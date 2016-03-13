@@ -2,13 +2,26 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:IsHubApp"
-        xmlns:lib="clr-namespace:SPLib"
-        xmlns:SPLib="clr-namespace:SPLib;assembly=SPLib" 
+        xmlns:lib="clr-namespace:SPLib;assembly=SPLib"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         x:Class="IsHubApp.MainWindow"
-        Title="Is-Hub Utility" Width="600" Height="400" WindowStartupLocation="CenterScreen">
+        Title="Is-Hub Utility" Width="500" Height="400" WindowStartupLocation="CenterScreen">
+        <!--xmlns:lib="clr-namespace:SPLib"-->
+    <Window.Resources>
+        <lib:NegateConverter x:Key="negate" />
+    </Window.Resources>
     <Window.CommandBindings>
-        <!--<CommandBinding Command="local:AppCommands.ShowPortSettingsFormCommand" Executed="CommandBinding_Executed"/>-->
+        <CommandBinding Command="local:AppCommands.AboutCommand" Executed="CommandBinding_Executed"/>
+        <CommandBinding Command="local:AppCommands.OpenPortCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
+        <CommandBinding Command="local:AppCommands.ClosePortCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
+        <CommandBinding Command="local:AppCommands.ShowPortSettingsFormCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
+
+        <CommandBinding Command="local:AppCommands.InitCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
+        <CommandBinding Command="local:AppCommands.StartPollCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
+        <CommandBinding Command="local:AppCommands.PollTimerCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
+        <!--<CommandBinding Command="local:AppCommands.StopPollCommand" Executed="CommandBinding_Executed"/>-->
+        <CommandBinding Command="local:AppCommands.StartFlowCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
+        <CommandBinding Command="local:AppCommands.StopFlowCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
     </Window.CommandBindings>
     <Grid>
         <Grid.RowDefinitions>
@@ -31,23 +44,26 @@
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!---->
-            <Grid Grid.Row="0" Margin="10,5" >
+            <Grid Grid.Row="0" Margin="10,10,5,0" >
                 <StackPanel  HorizontalAlignment="Left" Orientation="Horizontal">
-                    <Button Content="Начать опрос" Grid.Column="1" Margin="0" 
+                    <Button Content="Инициализировать" Command="local:AppCommands.InitCommand"/>
+                    <Button Content="Опросить" Grid.Column="1" Margin="5,0" 
                         Command="local:AppCommands.StartPollCommand"/>
-                    <Button Content="Остановить" Grid.Column="1" Margin="0" 
-                        Command="local:AppCommands.StopPollCommand"/>
+                    <!--<Button Content="Остановить" Grid.Column="1" Margin="5,0"
+                        Command="local:AppCommands.StopPollCommand" Background="LightPink"/>-->
                     
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="cbAutoPoll" Content="Автоопрос каждые" Margin="5,0" VerticalAlignment="Center"/>
-                        <xctk:IntegerUpDown x:Name="tbLogClear" Minimum="0" Width="60"
+                        <CheckBox x:Name="cbAutoPoll" Content="Опрашивать каждые" Margin="5,0" VerticalAlignment="Center"
+                                  Command="local:AppCommands.PollTimerCommand" />
+                        <xctk:IntegerUpDown x:Name="tbPollTimer" Minimum="0" Width="60"
                                             Value="{Binding Path=MaxLogNum, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
-                                            IsEnabled="{Binding ElementName=cbAutoPoll, Path=IsChecked}"/>
-                        <TextBlock Text="мсек" Margin="5,0"/>
+                                            IsEnabled="{Binding ElementName=cbAutoPoll, Path=IsChecked, Converter={StaticResource negate}}"/>
+                        <TextBlock Text="мсек" Margin="2,0,5,0" VerticalAlignment="Center"/>
+                        <!--<Button Content="Применить" Command="local:AppCommands.PollTimerCommand"/>-->
                     </StackPanel>
                 </StackPanel>
 
@@ -86,13 +102,15 @@
                         <RadioButton Content="3" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="3"/>
                         <RadioButton Content="4" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="4"/>
                     </Grid>
-                    <Button Content="Начать отпуск" Grid.Column="1" Margin="0" 
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Начать отпуск" Margin="0" 
+                            Command="local:AppCommands.StartFlowCommand"/>
+                        <Button Content="Остановить" Margin="5,0" 
                             Command="local:AppCommands.StopFlowCommand"/>
-                    <Button Content="Остановить" Grid.Column="1" Margin="0" 
-                            Command="local:AppCommands.StopFlowCommand"/>
-                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="5">
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5">
                         <TextBlock Text="Отпущено:" Margin="0,0,5,0"/>
-                        <TextBox x:Name="tbFlow" Width="80" IsReadOnly="True"/>
+                        <TextBox x:Name="tbFlow" Width="60" IsReadOnly="True"/>
                         <TextBlock Text="л" Margin="5,0,0,0"/>
                     </StackPanel>
                 </StackPanel>
@@ -127,8 +145,8 @@
                             <CheckBox Content="3" Grid.Column="1" Grid.Row="3"/>
                             <CheckBox Content="4" Grid.Column="1" Grid.Row="4"/>
 
-                            <TextBox x:Name="tbIsHubSide1" Grid.Column="0" Grid.Row="5"/>
-                            <TextBox x:Name="tbIsHubSide2" Grid.Column="1" Grid.Row="5"/>
+                            <TextBox x:Name="tbIsHubInfo1" Grid.Column="0" Grid.Row="5" Margin="0,0,5,0" IsReadOnly="True"/>
+                        <TextBox x:Name="tbIsHubInfo2" Grid.Column="1" Grid.Row="5" Margin="0,0,5,0" IsReadOnly="True"/>
                         </Grid>
                     </GroupBox>
                 </Grid>
@@ -149,6 +167,6 @@
             </Expander>
 
             <!-- -->
-            <SPLib:CircularProgressBar x:Name="pbCircular" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed"/>
+            <!--<lib:CircularProgressBar x:Name="pbCircular" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed"/>-->
         </Grid>
 </Window>

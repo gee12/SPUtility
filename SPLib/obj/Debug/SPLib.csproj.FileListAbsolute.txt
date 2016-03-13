@@ -29,3 +29,4 @@ D:\GoogleDrive\Projects\SPUtility\SPLib\obj\Debug\SPLib.Properties.Resources.res
 D:\GoogleDrive\Projects\SPUtility\SPLib\obj\Debug\SPLib.csproj.GenerateResource.Cache
 D:\GoogleDrive\Projects\SPUtility\SPLib\obj\Debug\SPLib.dll
 D:\GoogleDrive\Projects\SPUtility\SPLib\obj\Debug\SPLib.pdb
+D:\GoogleDrive\Projects\SPUtility\SPLib\obj\Debug\SPLib.csprojResolveAssemblyReference.cache

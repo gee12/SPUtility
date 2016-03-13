@@ -14,3 +14,4 @@ D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.Properties.Resourc
 D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.csproj.GenerateResource.Cache
 D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.exe
 D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.pdb
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\bin\Debug\Xceed.Wpf.Toolkit.dll

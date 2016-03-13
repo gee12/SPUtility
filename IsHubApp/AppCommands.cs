@@ -13,26 +13,26 @@ namespace IsHubApp
         public static RoutedUICommand ShowPortSettingsFormCommand { get; protected set; }
         public static RoutedUICommand OpenPortCommand { get; protected set; }
         public static RoutedUICommand ClosePortCommand { get; protected set; }
-        public static RoutedUICommand AddDataCommand { get; protected set; }
-        public static RoutedUICommand SendCommand { get; protected set; }
         public static RoutedUICommand AboutCommand { get; protected set; }
         public static RoutedUICommand StartPollCommand { get; protected set; }
         public static RoutedUICommand StopPollCommand { get; protected set; }
         public static RoutedUICommand StartFlowCommand { get; protected set; }
         public static RoutedUICommand StopFlowCommand { get; protected set; }
+        public static RoutedUICommand PollTimerCommand { get; protected set; }
+        public static RoutedUICommand InitCommand { get; protected set; }
         
         static AppCommands()
         {
             ShowPortSettingsFormCommand = new RoutedUICommand("", "ShowSettingsFormCommand", typeof(AppCommands));
             OpenPortCommand = new RoutedUICommand("", "OpenPortCommand", typeof(AppCommands));
             ClosePortCommand = new RoutedUICommand("", "ClosePortCommand", typeof(AppCommands));
-            AddDataCommand = new RoutedUICommand("", "AddDataCommand", typeof(AppCommands));
-            SendCommand = new RoutedUICommand("", "SendCommand", typeof(AppCommands));
             AboutCommand = new RoutedUICommand("", "AboutCommand", typeof(AppCommands));
             StartPollCommand = new RoutedUICommand("", "StartPollCommand", typeof(AppCommands));
             StopPollCommand = new RoutedUICommand("", "StopPollCommand", typeof(AppCommands));
             StartFlowCommand = new RoutedUICommand("", "StartFlowCommand", typeof(AppCommands));
             StopFlowCommand = new RoutedUICommand("", "StopFlowCommand", typeof(AppCommands));
+            PollTimerCommand = new RoutedUICommand("", "PollTimeoutCommand", typeof(AppCommands));
+            InitCommand = new RoutedUICommand("", "InitCommand", typeof(AppCommands));
         }
 
     }
