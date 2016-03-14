@@ -44,7 +44,7 @@
             
             <StackPanel Grid.ColumnSpan="2" Grid.Row="0" Margin="10,5">
                 <RadioButton x:Name="rbText" Content="Текст" GroupName="dataType" IsChecked="True"/>
-                <RadioButton x:Name="rbHex" Content="HEX" GroupName="dataType"/>
+                <RadioButton x:Name="rbHex" Content="HEX числа" GroupName="dataType"/>
             </StackPanel>
 
             <TextBox x:Name="tbData" Grid.Row="1" Margin="5"/>

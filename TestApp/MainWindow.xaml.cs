@@ -169,7 +169,7 @@ namespace TestApp
             {
                 try
                 {
-                    bytes = Utils.ToByteHexArray(data, " ");
+                    bytes = Utils.ToByteArrayFromHex(data, " ");
                 }
                 catch
                 {
@@ -177,9 +177,10 @@ namespace TestApp
                     return;
                 }
 
-                //var s = string.Join(" ", bytes);
             }
-            Log.Add("Добавлено в буфер: " + data);
+            //var s = string.Join(" ", bytes);
+            var s = Utils.ToHexString(bytes);
+            Log.Add("Добавлено в буфер: " + data + " Внутреннее представление: " + s + ")");
             tbBuffer.AppendText(data + Environment.NewLine);
 
             this.spConnection.AddData(bytes);
@@ -199,8 +200,10 @@ namespace TestApp
                     if (rbText.IsChecked.GetValueOrDefault())
                         data = Encoding.Default.GetString(bytes);
                     else if (rbHex.IsChecked.GetValueOrDefault())
-                        data = Utils.ToString(bytes);
-                    Log.Add("Принято: " + data.Trim());
+                        data = Utils.ToHexString(bytes);
+                    //var s = string.Join(" ", bytes);
+                    var s = Utils.ToHexString(bytes);
+                    Log.Add("Принято: " + data.Trim() + " (Внутреннее представление: " + s + ")");
                 }));
         }
 
@@ -211,7 +214,8 @@ namespace TestApp
             else if (rbHex.IsChecked.GetValueOrDefault())
                 this.spConnection.SendMode = SPConnection.SendModes.HexDecimal;
             var bytes = this.spConnection.SendData();
-            var s = string.Join(" ", bytes);
+            //var s = string.Join(" ", bytes);
+            var s = Utils.ToHexString(bytes);
             Log.Add("Отправлено: " + s);
             tbBuffer.Clear();
         }
@@ -237,27 +241,27 @@ namespace TestApp
         /// <summary>
         /// 
         /// </summary>
-        class OpenPortTask : Utils.AsyncTask<MainWindow, SerialPort, bool>
-        {
-            protected override void pre(MainWindow form)
-            {
-                form.pbCircular.Visibility = Visibility.Visible;
-            }
+        //class OpenPortTask : Utils.AsyncTask<MainWindow, SerialPort, bool>
+        //{
+        //    protected override void pre(MainWindow form)
+        //    {
+        //        form.pbCircular.Visibility = Visibility.Visible;
+        //    }
 
-            protected override bool run(SerialPort port)
-            {
-                try
-                {
-                    port.Open();
-                }
-                catch {}
-                return port.IsOpen;
-            }
+        //    protected override bool run(SerialPort port)
+        //    {
+        //        try
+        //        {
+        //            port.Open();
+        //        }
+        //        catch {}
+        //        return port.IsOpen;
+        //    }
 
-            protected override void post(MainWindow form, bool res)
-            {
-                form.pbCircular.Visibility = Visibility.Collapsed;
-            }
-        }
+        //    protected override void post(MainWindow form, bool res)
+        //    {
+        //        form.pbCircular.Visibility = Visibility.Collapsed;
+        //    }
+        //}
     }
 }

@@ -14,3 +14,4 @@ D:\Projects\SPUtility\SPLib\obj\Debug\SPLib.Properties.Resources.resources
 D:\Projects\SPUtility\SPLib\obj\Debug\SPLib.csproj.GenerateResource.Cache
 D:\Projects\SPUtility\SPLib\obj\Debug\SPLib.dll
 D:\Projects\SPUtility\SPLib\obj\Debug\SPLib.pdb
+D:\Projects\SPUtility\SPLib\obj\Debug\SPLib.csprojResolveAssemblyReference.cache
