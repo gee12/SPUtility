@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace SPLib
@@ -65,7 +69,7 @@ namespace SPLib
 
         public static byte[] ToByteArrayFromHex(string hex, string separ)
         {
-            var hexes = hex.Split(new [] {separ}, StringSplitOptions.RemoveEmptyEntries);
+            var hexes = hex.Split(new[] { separ }, StringSplitOptions.RemoveEmptyEntries);
             return hexes.Select(x => Convert.ToByte(x, 16))
                              .ToArray();
         }
@@ -76,6 +80,43 @@ namespace SPLib
             foreach (byte b in bytes)
                 hex.AppendFormat("{0:X2} ", b);
             return hex.ToString();
+        }
+
+        public static bool OnUnsignedIntTextInput(TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[0-9]+");
+            return !regex.IsMatch(e.Text);
+        }
+
+        public static void OnUnsignedIntPreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = Utils.OnUnsignedIntTextInput(e);
+        }
+
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class NegateConverter : IValueConverter
+    {
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool)
+            {
+                return !(bool)value;
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool)
+            {
+                return !(bool)value;
+            }
+            return value;
         }
     }
 }

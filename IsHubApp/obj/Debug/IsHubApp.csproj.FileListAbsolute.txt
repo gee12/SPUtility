@@ -1,0 +1,17 @@
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.csprojResolveAssemblyReference.cache
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\MainWindow.g.cs
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\App.g.cs
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp_MarkupCompile.cache
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp_MarkupCompile.lref
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\bin\Debug\IsHubApp.exe.config
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\bin\Debug\IsHubApp.exe
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\bin\Debug\IsHubApp.pdb
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\bin\Debug\SPLib.dll
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\bin\Debug\SPLib.pdb
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\MainWindow.baml
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.g.resources
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.Properties.Resources.resources
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.csproj.GenerateResource.Cache
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.exe
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.pdb
+D:\GoogleDrive\Projects\SPUtility\IsHubApp\bin\Debug\Xceed.Wpf.Toolkit.dll

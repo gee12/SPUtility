@@ -27,10 +27,7 @@ namespace TestApp
         public static readonly string ASSEMBLY_NAME = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
         public static readonly string LOG_PATH = ".";
 
-        //SerialPort port;
         SPConnection spConnection;
-        //bool isPortOpened { get { return (port != null && port.IsOpen); }}
-        //delegate void DataReceivedDeleg(byte[] bytes);
 
         /// <summary>
         /// 
@@ -42,11 +39,7 @@ namespace TestApp
 
             Log.Init(ASSEMBLY_NAME, LOG_PATH, false, WriteLog);
 
-
-            //this.port = new SerialPort();
-            //this.port.DataReceived += new SerialDataReceivedEventHandler(OnDataReceived);
             this.spConnection = new SPConnection();
-
             this.spConnection.DataReceivingHandler += DataReceived;
         }
 
@@ -180,7 +173,7 @@ namespace TestApp
             }
             //var s = string.Join(" ", bytes);
             var s = Utils.ToHexString(bytes);
-            Log.Add("Добавлено в буфер: " + data + " Внутреннее представление: " + s + ")");
+            Log.Add("Добавлено в буфер: " + data + " (Внутреннее представление: " + s + ")");
             tbBuffer.AppendText(data + Environment.NewLine);
 
             this.spConnection.AddData(bytes);
