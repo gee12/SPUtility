@@ -1,4 +1,5 @@
-﻿using SPLib;
+﻿using IsHubLib;
+using SPLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,10 +26,12 @@ namespace IsHubApp
         public static readonly string ASSEMBLY_NAME = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
         public static readonly string LOG_PATH = ".";
 
-        SPConnection comPort;
-        IsHub isHub;
+        IsHub isHub { get; set; }
         Timer autoPollTimer;
-        bool isPollStarted = false;
+        //bool isPollStarted = false;
+        int curPistol;
+
+        bool IsAutoPoll { get { return cbAutoPoll.IsChecked.GetValueOrDefault(); } set { cbAutoPoll.IsChecked = value; } }
 
         /// <summary>
         /// 
@@ -40,14 +43,15 @@ namespace IsHubApp
 
             Log.Init(ASSEMBLY_NAME, LOG_PATH, false, WriteLog);
 
-            this.comPort = new SPConnection();
-            this.comPort.DataReceivingHandler += DataReceived;
-            this.isHub = new IsHub();
+            this.isHub = new Gilbarco(Gilbarco.GilbarcoDoseAlgorithms.Algorithm1, DataSent, DataReceived);
 
             autoPollTimer = new Timer();
             autoPollTimer.Elapsed += PollTimerElapsed;
-            tbPollTimer.ValueChanged += tbInterval_ValueChanged;
-            tbPollTimer.PreviewTextInput += SPLib.Utils.OnUnsignedIntPreviewTextInput;
+            tbPollTimeout.PreviewTextInput += SPLib.Utils.OnUnsignedIntPreviewTextInput;
+
+            gIndicators.DataContext = isHub;
+
+
         }
 
         /// <summary>
@@ -92,6 +96,10 @@ namespace IsHubApp
             {
                 StartFlow();
             }
+            else if (AppCommands.DoseCommand.Equals(command))
+            {
+                DefineDose();
+            }
             else if (AppCommands.StopFlowCommand.Equals(command))
             {
                 StopFlow();
@@ -103,48 +111,60 @@ namespace IsHubApp
         /// </summary>
         private void CommandBinding_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            var command = e.Command;
-            if (AppCommands.OpenPortCommand.Equals(command))
+            if (this.isHub == null) return;
+
+            var command = e.Command; 
+            // port
+            if (AppCommands.ShowPortSettingsFormCommand.Equals(command))
             {
-                e.CanExecute = !this.comPort.IsPortOpened;
+                e.CanExecute = !this.isHub.ComPort.IsPortOpened;
+            }
+            else if (AppCommands.OpenPortCommand.Equals(command))
+            {
+                e.CanExecute = !this.isHub.ComPort.IsPortOpened;
             }
             else if (AppCommands.ClosePortCommand.Equals(command))
             {
-                e.CanExecute = this.comPort.IsPortOpened;
+                e.CanExecute = this.isHub.ComPort.IsPortOpened;
             }
-           
-            if (AppCommands.InitCommand.Equals(command))
+            // init
+            else if (AppCommands.InitCommand.Equals(command))
             {
-                e.CanExecute = this.comPort.IsPortOpened && !this.isHub.IsOnline;
+                e.CanExecute = this.isHub.ComPort.IsPortOpened && !this.isHub.IsOnline && this.isHub.IsFree;
             }
-            
-            //
-            if (!this.isHub.IsOnline)
-            {
-                e.CanExecute = false;
-                return;
-            }
-
+            //////////// IsOnline
+            //else if (!this.isHub.IsOnline || !this.isHub.IsFree)
+            //{
+            //    e.CanExecute = false;
+            //}
+            // poll
             else if (AppCommands.StartPollCommand.Equals(command))
             {
+                //e.CanExecute = !this.isHub.IsFlowAllowed;
+                e.CanExecute = true;
+            }
+            else if (AppCommands.PollTimerCommand.Equals(command))
+            {
+                if (!cbAutoPoll.IsChecked.Value)
+                {
+                    int res;
+                    bool parsed = Int32.TryParse(tbPollTimeout.Value.ToString(), out res);
+                    e.CanExecute = parsed && res >= tbPollTimeout.Minimum;
+                }
+                else e.CanExecute = true;
+            }
+            // flow
+            else if (AppCommands.StartFlowCommand.Equals(command))
+            {
                 e.CanExecute = !this.isHub.IsFlowAllowed;
+            }
+            else if (AppCommands.DoseCommand.Equals(command))
+            {
+                e.CanExecute = this.isHub.IsFlowAllowed;
             }
             else if (AppCommands.StopFlowCommand.Equals(command))
             {
                 e.CanExecute = this.isHub.IsFlowAllowed;
-            }
-            else if (AppCommands.PollTimerCommand.Equals(command))
-            {
-                if (!this.isHub.IsOnline)
-                {
-                    e.CanExecute = false;
-                }
-                else if (!cbAutoPoll.IsChecked.Value)
-                {
-                    int res;
-                    bool parsed = Int32.TryParse(tbPollTimer.Value.ToString(), out res);
-                    e.CanExecute = parsed && res >= tbPollTimer.Minimum;
-                }
             }
         }
 
@@ -155,11 +175,11 @@ namespace IsHubApp
         {
             var form = new SPSettingsForm();
             form.Owner = this;
-            if (form.ShowModal(this.comPort.Port))
+            if (form.ShowModal(this.isHub.ComPort.Port))
             {
                 //this.port = form.SerialPort;
-                this.comPort.SetPortSettings(form.SerialPort);
-                Log.Add("Параметры COM-порта успешно изменены");
+                this.isHub.ComPort.SetPortSettings(form.SerialPort);
+                Log.Add("Параметры COM-порта изменены");
             }
         }
 
@@ -168,9 +188,9 @@ namespace IsHubApp
         /// </summary>
         void OpenPort()
         {
-            Log.Add("Открытие порта: " + comPort.Port.PortName);
-            comPort.OpenPort();
-            Log.Add("Результат: " + comPort.IsPortOpened);
+            Log.Add("Открытие порта: " + isHub.ComPort.ToString());
+            isHub.Open();
+            Log.Add("Результат: " + isHub.ComPort.IsPortOpened);
         }
 
         /// <summary>
@@ -178,20 +198,10 @@ namespace IsHubApp
         /// </summary>
         void ClosePort()
         {
-            Log.Add("Закрытие порта: " + comPort.Port.PortName);
-            comPort.ClosePort();
-        }
+            IsAutoPoll = false;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        void DataReceived(byte[] bytes)
-        {
-            this.Dispatcher.Invoke((Action)(() =>
-            {
-                var s = Utils.ToHexString(bytes);
-                Log.Add("Принято: " + s);
-            }));
+            Log.Add("Закрытие порта: " + isHub.ComPort.Port.PortName);
+            isHub.Close();
         }
 
         /// <summary>
@@ -199,9 +209,8 @@ namespace IsHubApp
         /// </summary>
         void Init()
         {
-            var bytes = this.isHub.SendInit();
-            var s = Utils.ToHexString(bytes);
-            Log.Add("Инициализация: " + s);
+            Log.Add("Инициализация");
+            this.isHub.SendInit();
         }
 
         /// <summary>
@@ -209,7 +218,8 @@ namespace IsHubApp
         /// </summary>
         void StartPoll()
         {
-
+            Log.Add("Простой опрос вручную");
+            this.isHub.SendPoll();
         }
         
         /// <summary>
@@ -220,7 +230,7 @@ namespace IsHubApp
             bool isNeedTimer = cbAutoPoll.IsChecked.GetValueOrDefault();
             if (isNeedTimer)
             {
-                int value = Int32.Parse(tbInterval.Value.ToString());
+                int value = Int32.Parse(tbPollTimeout.Value.ToString());
                 autoPollTimer.Interval = value;
                 autoPollTimer.Start();
             }
@@ -228,27 +238,64 @@ namespace IsHubApp
             {
                 autoPollTimer.Stop();
             }
-            tbPollTimer.IsEnabled = !isNeedTimer;
+            tbPollTimeout.IsEnabled = !isNeedTimer;
         }
 
+
+        bool isFlowMode = false;
+        /// <summary>
+        /// 
+        /// </summary>
         void PollTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            StartPoll();
-        }
+            //
+            if (!this.isHub.ComPort.IsPortOpened)
+            {
+                autoPollTimer.Stop();
+                return;
+            }
 
-        //void tbInterval_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        //{
-        //    int res;
-        //    bool parsed = Int32.TryParse(tbPollTimer.Value.ToString(), out res);
-        //    bSetInterval.IsEnabled = parsed && res >= tbPollTimer.Minimum;
-        //}
+            //
+            if (this.isHub.IsFree)
+            {
+                // запускаем только простой опрос
+                if (!this.isHub.IsFlowAllowed)
+                {
+                    this.isHub.SendPoll();
+                }
+                else
+                {
+                    // запускаем простой опрос и опрос дозы по очереди
+                    if (isFlowMode)
+                    {
+                        this.isHub.SendDose();
+                    }
+                    else
+                    {
+                        this.isHub.SendPoll();
+                    }
+                    isFlowMode = !isFlowMode;
+                }
+
+            }
+        }
 
         /// <summary>
         /// 
         /// </summary>
         void StartFlow()
         {
+            Log.Add("Начать отпуск");
+            this.isHub.SendStartFlow(curPistol);
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        void DefineDose()
+        {
+            Log.Add("Определить отпуск вручную");
+            this.isHub.SendDose();
         }
 
         /// <summary>
@@ -256,7 +303,40 @@ namespace IsHubApp
         /// </summary>
         void StopFlow()
         {
+            Log.Add("Закончить отпуск");
+            this.isHub.SendStopFlow();
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        void DataSent(byte[] bytes)
+        {
+            if (bytes == null) return;
+            this.Dispatcher.Invoke((Action)(() =>
+            {
+                var s = Utils.ToHexString(bytes);
+                Log.Add("Отправлено: " + s);
+            }));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void DataReceived(byte[] bytes)
+        {
+            this.Dispatcher.Invoke((Action)(() =>
+            {
+                if (bytes == null)
+                {
+                    Log.Add("Нет ответа...");
+                }
+                else
+                {
+                    var s = Utils.ToHexString(bytes);
+                    Log.Add("Принято: " + s);
+                }
+            }));
         }
 
         /// <summary>
@@ -279,7 +359,38 @@ namespace IsHubApp
 
         void ShowAboutForm()
         {
+            string s = string.Format("Is-Hub Utility, версия {0}\n2016 г.", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+            MessageBox.Show(this, s, "О программе", MessageBoxButton.OK, MessageBoxImage.None);
+        }
 
+        private void RadioButton_Click(object sender, RoutedEventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+            this.curPistol = Int32.Parse(rb.Tag.ToString());
+        }
+
+        private void AlgRadioButton_Click(object sender, RoutedEventArgs e)
+        {
+            RadioButton rb = sender as RadioButton;
+            int algNum = Int32.Parse(rb.Tag.ToString());
+            this.isHub.DoseAlgorithm = Gilbarco.GilbarcoDoseAlgorithms.FromValue<Gilbarco.GilbarcoDoseAlgorithms>(algNum);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ByteToHexConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            byte b = (byte)value;
+            return Utils.ToHexString(b);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
         }
     }
 }

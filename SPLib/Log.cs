@@ -73,7 +73,8 @@ namespace SPLib
             finally
             {
                 //
-                LogHandler.Invoke(s);
+                if (LogHandler != null)
+                    LogHandler.Invoke(s);
                 Console.WriteLine(s);
             }
         }

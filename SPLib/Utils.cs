@@ -82,6 +82,11 @@ namespace SPLib
             return hex.ToString();
         }
 
+        public static string ToHexString(byte b)
+        {
+            return string.Format("{0:X2} ", b);
+        }
+
         public static bool OnUnsignedIntTextInput(TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[0-9]+");

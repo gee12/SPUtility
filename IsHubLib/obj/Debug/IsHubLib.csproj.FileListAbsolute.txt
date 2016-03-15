@@ -1,0 +1,8 @@
+D:\Projects\SPUtility\IsHubLib\bin\Debug\IsHubLib.dll
+D:\Projects\SPUtility\IsHubLib\bin\Debug\IsHubLib.pdb
+D:\Projects\SPUtility\IsHubLib\bin\Debug\SPLib.dll
+D:\Projects\SPUtility\IsHubLib\bin\Debug\Xceed.Wpf.Toolkit.dll
+D:\Projects\SPUtility\IsHubLib\bin\Debug\SPLib.pdb
+D:\Projects\SPUtility\IsHubLib\obj\Debug\IsHubLib.csprojResolveAssemblyReference.cache
+D:\Projects\SPUtility\IsHubLib\obj\Debug\IsHubLib.dll
+D:\Projects\SPUtility\IsHubLib\obj\Debug\IsHubLib.pdb

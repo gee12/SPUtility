@@ -20,6 +20,7 @@ namespace IsHubApp
         public static RoutedUICommand StopFlowCommand { get; protected set; }
         public static RoutedUICommand PollTimerCommand { get; protected set; }
         public static RoutedUICommand InitCommand { get; protected set; }
+        public static RoutedUICommand DoseCommand { get; protected set; }
         
         static AppCommands()
         {
@@ -33,6 +34,7 @@ namespace IsHubApp
             StopFlowCommand = new RoutedUICommand("", "StopFlowCommand", typeof(AppCommands));
             PollTimerCommand = new RoutedUICommand("", "PollTimeoutCommand", typeof(AppCommands));
             InitCommand = new RoutedUICommand("", "InitCommand", typeof(AppCommands));
+            DoseCommand = new RoutedUICommand("", "DoseCommand", typeof(AppCommands));
         }
 
     }

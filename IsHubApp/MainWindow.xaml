@@ -6,9 +6,10 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         x:Class="IsHubApp.MainWindow"
         Title="Is-Hub Utility" Width="500" Height="400" WindowStartupLocation="CenterScreen">
-        <!--xmlns:lib="clr-namespace:SPLib"-->
+    <!--xmlns:lib="clr-namespace:SPLib"-->
     <Window.Resources>
         <lib:NegateConverter x:Key="negate" />
+        <local:ByteToHexConverter x:Key="hexConverter"/>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="local:AppCommands.AboutCommand" Executed="CommandBinding_Executed"/>
@@ -21,13 +22,14 @@
         <CommandBinding Command="local:AppCommands.PollTimerCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
         <!--<CommandBinding Command="local:AppCommands.StopPollCommand" Executed="CommandBinding_Executed"/>-->
         <CommandBinding Command="local:AppCommands.StartFlowCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
+        <CommandBinding Command="local:AppCommands.DoseCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
         <CommandBinding Command="local:AppCommands.StopFlowCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
     </Window.CommandBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="2*" />
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <!--<RowDefinition Height="Auto"/>-->
             <RowDefinition Height="*" MinHeight="24"/>
         </Grid.RowDefinitions>
 
@@ -55,29 +57,38 @@
                         Command="local:AppCommands.StartPollCommand"/>
                     <!--<Button Content="Остановить" Grid.Column="1" Margin="5,0"
                         Command="local:AppCommands.StopPollCommand" Background="LightPink"/>-->
-                    
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="cbAutoPoll" Content="Опрашивать каждые" Margin="5,0" VerticalAlignment="Center"
+
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="cbAutoPoll" Content="Опрашивать каждые" Margin="5,0" VerticalAlignment="Center"
                                   Command="local:AppCommands.PollTimerCommand" />
-                        <xctk:IntegerUpDown x:Name="tbPollTimer" Minimum="0" Width="60"
-                                            Value="{Binding Path=MaxLogNum, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
-                                            IsEnabled="{Binding ElementName=cbAutoPoll, Path=IsChecked, Converter={StaticResource negate}}"/>
-                        <TextBlock Text="мсек" Margin="2,0,5,0" VerticalAlignment="Center"/>
-                        <!--<Button Content="Применить" Command="local:AppCommands.PollTimerCommand"/>-->
-                    </StackPanel>
-                </StackPanel>
+                <xctk:IntegerUpDown x:Name="tbPollTimeout" Width="60" Value="500" Minimum="10" 
+                                    IsEnabled="{Binding ElementName=cbAutoPoll, Path=IsChecked, Converter={StaticResource negate}}"/>
+                <TextBlock Text="мсек" Margin="2,0,5,0" VerticalAlignment="Center"/>
+                <!--<Button Content="Применить" Command="local:AppCommands.PollTimerCommand"/>-->
+            </StackPanel>
+            </StackPanel>
 
-            </Grid>
+        </Grid>
 
-            <Grid Grid.Row="1" Margin="10,5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
+        <Grid Grid.Row="1" Margin="10,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
 
-                <!---->
+            <!---->
             <GroupBox Header="Отпуск">
-                <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    
                     <Grid Width="130" HorizontalAlignment="Left" Margin="5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
@@ -93,34 +104,41 @@
 
                         <TextBlock Text="Стор.1"/>
                         <TextBlock Text="Стор.2" Grid.Column="1"/>
-                        <RadioButton Content="1" GroupName="GunsRadioGroup" Grid.Column="0" Grid.Row="1"/>
-                        <RadioButton Content="2" GroupName="GunsRadioGroup" Grid.Column="0" Grid.Row="2"/>
-                        <RadioButton Content="3" GroupName="GunsRadioGroup" Grid.Column="0" Grid.Row="3"/>
-                        <RadioButton Content="4" GroupName="GunsRadioGroup" Grid.Column="0" Grid.Row="4"/>
-                        <RadioButton Content="1" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="1"/>
-                        <RadioButton Content="2" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="2"/>
-                        <RadioButton Content="3" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="3"/>
-                        <RadioButton Content="4" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="4"/>
+                        <RadioButton Content="1" GroupName="GunsRadioGroup" Grid.Column="0" Grid.Row="1" Tag="0" Click="RadioButton_Click" IsChecked="True"/>
+                        <RadioButton Content="2" GroupName="GunsRadioGroup" Grid.Column="0" Grid.Row="2" Tag="1" Click="RadioButton_Click"/>
+                        <RadioButton Content="3" GroupName="GunsRadioGroup" Grid.Column="0" Grid.Row="3" Tag="2" Click="RadioButton_Click"/>
+                        <RadioButton Content="4" GroupName="GunsRadioGroup" Grid.Column="0" Grid.Row="4" Tag="3" Click="RadioButton_Click"/>
+                        <RadioButton Content="1" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="1" Tag="4" Click="RadioButton_Click"/>
+                        <RadioButton Content="2" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="2" Tag="5" Click="RadioButton_Click"/>
+                        <RadioButton Content="3" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="3" Tag="6" Click="RadioButton_Click"/>
+                        <RadioButton Content="4" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="4" Tag="7" Click="RadioButton_Click"/>
                     </Grid>
-                    <StackPanel Orientation="Horizontal">
-                        <Button Content="Начать отпуск" Margin="0" 
+                    <StackPanel Margin="0,5" Grid.Column="1">
+                        <Button Content="Начать отпуск" Margin="15,5,5,0" 
                             Command="local:AppCommands.StartFlowCommand"/>
-                        <Button Content="Остановить" Margin="5,0" 
+                        <Button Content="Обнов. отпуск" Margin="15,5,5,0" 
+                            Command="local:AppCommands.DoseCommand"/>
+                        <Button Content="Остановить" Margin="15,5,5,0" 
                             Command="local:AppCommands.StopFlowCommand"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5">
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Grid.Row="1" Grid.ColumnSpan="2">
+                        <RadioButton Content="Алгоритм 1   " GroupName="AlgRadioGroup" Tag="1" Click="AlgRadioButton_Click" IsChecked="True"/>
+                        <RadioButton Content="Алгоритм 2" GroupName="AlgRadioGroup" Tag="2" Click="AlgRadioButton_Click"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,5,0,5" Grid.ColumnSpan="2">
                         <TextBlock Text="Отпущено:" Margin="0,0,5,0"/>
                         <TextBox x:Name="tbFlow" Width="60" IsReadOnly="True"/>
                         <TextBlock Text="л" Margin="5,0,0,0"/>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </GroupBox>
 
 
             <!---->
-                <Grid Grid.Column="1">
-                    <GroupBox Header="Is-Hub">
-                        <Grid Width="130" HorizontalAlignment="Left" Margin="5">
+            <Grid Grid.Column="1">
+                <GroupBox x:Name="gIndicators" Header="Индикаторы">
+                    <StackPanel>
+                        <Grid Width="130" HorizontalAlignment="Left" Margin="5" IsEnabled="{Binding IsOnline, Mode=OneWay}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
@@ -136,37 +154,42 @@
 
                             <TextBlock Text="Стор.1"/>
                             <TextBlock Text="Стор.2" Grid.Column="1"/>
-                            <CheckBox Content="1"  Grid.Column="0" Grid.Row="1"/>
-                            <CheckBox Content="2" Grid.Column="0" Grid.Row="2"/>
-                            <CheckBox Content="3" Grid.Column="0" Grid.Row="3"/>
-                            <CheckBox Content="4" Grid.Column="0" Grid.Row="4"/>
-                            <CheckBox Content="1" Grid.Column="1" Grid.Row="1"/>
-                            <CheckBox Content="2" Grid.Column="1" Grid.Row="2"/>
-                            <CheckBox Content="3" Grid.Column="1" Grid.Row="3"/>
-                            <CheckBox Content="4" Grid.Column="1" Grid.Row="4"/>
+                            <CheckBox Content="1" Grid.Column="0" Grid.Row="1" IsChecked="{Binding Pistol11, Mode=OneWay}" IsHitTestVisible="False"/>
+                            <CheckBox Content="2" Grid.Column="0" Grid.Row="2" IsChecked="{Binding Pistol12, Mode=OneWay}" IsHitTestVisible="False"/>
+                            <CheckBox Content="3" Grid.Column="0" Grid.Row="3" IsChecked="{Binding Pistol13, Mode=OneWay}" IsHitTestVisible="False"/>
+                            <CheckBox Content="4" Grid.Column="0" Grid.Row="4" IsChecked="{Binding Pistol14, Mode=OneWay}" IsHitTestVisible="False"/>
+                            <CheckBox Content="1" Grid.Column="1" Grid.Row="1" IsChecked="{Binding Pistol21, Mode=OneWay}" IsHitTestVisible="False"/>
+                            <CheckBox Content="2" Grid.Column="1" Grid.Row="2" IsChecked="{Binding Pistol22, Mode=OneWay}" IsHitTestVisible="False"/>
+                            <CheckBox Content="3" Grid.Column="1" Grid.Row="3" IsChecked="{Binding Pistol23, Mode=OneWay}" IsHitTestVisible="False"/>
+                            <CheckBox Content="4" Grid.Column="1" Grid.Row="4" IsChecked="{Binding Pistol24, Mode=OneWay}" IsHitTestVisible="False"/>
 
-                            <TextBox x:Name="tbIsHubInfo1" Grid.Column="0" Grid.Row="5" Margin="0,0,5,0" IsReadOnly="True"/>
-                        <TextBox x:Name="tbIsHubInfo2" Grid.Column="1" Grid.Row="5" Margin="0,0,5,0" IsReadOnly="True"/>
+                            <TextBox x:Name="tbIsHubInfo1" Grid.Column="0" Grid.Row="5" Margin="0,0,5,0" IsReadOnly="True" 
+                                 Text="{Binding Side1Info, Mode=OneWay, Converter={StaticResource hexConverter}}"/>
+                            <TextBox x:Name="tbIsHubInfo2" Grid.Column="1" Grid.Row="5" Margin="0,0,5,0" IsReadOnly="True" 
+                                 Text="{Binding Side2Info, Mode=OneWay, Converter={StaticResource hexConverter}}"/>
+                            <!--/>-->
                         </Grid>
-                    </GroupBox>
-                </Grid>
-
-
+                        <CheckBox Content="На связи" IsChecked="{Binding IsOnline, Mode=OneWay}" IsHitTestVisible="False"/>
+                        <CheckBox Content="Передача данных" IsChecked="{Binding IsFree, Mode=OneWay, Converter={StaticResource negate}}" IsHitTestVisible="False" Margin="0,5"/>
+                    </StackPanel>
+                </GroupBox>
             </Grid>
-            
+
         </Grid>
 
-        <!-- -->
-            <GridSplitter Height="10" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" ShowsPreview="False" />
+    </Grid>
 
-            <!-- -->
-            <Expander Grid.Row="3" Header="Логи" IsExpanded="True" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                <Grid >
-                    <TextBox MinHeight="100" x:Name="tbLogs" TextWrapping="Wrap" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-                </Grid>
-            </Expander>
+    <!-- -->
+    <!--<GridSplitter Height="10" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" ShowsPreview="False" />-->
 
-            <!-- -->
-            <!--<lib:CircularProgressBar x:Name="pbCircular" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed"/>-->
+    <!-- -->
+    <GroupBox Grid.Row="2" Header="Логи" ScrollViewer.VerticalScrollBarVisibility="Auto">
+        <Grid >
+            <TextBox MinHeight="100" x:Name="tbLogs" TextWrapping="Wrap" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
         </Grid>
+    </GroupBox>
+
+    <!-- -->
+    <!--<lib:CircularProgressBar x:Name="pbCircular" Grid.Row="1" VerticalAlignment="Center" Visibility="Collapsed"/>-->
+    </Grid>
 </Window>

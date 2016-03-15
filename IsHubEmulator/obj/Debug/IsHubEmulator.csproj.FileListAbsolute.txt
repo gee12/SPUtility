@@ -1,0 +1,11 @@
+D:\Projects\SPUtility\IsHubEmulator\bin\Debug\IsHubEmulator.exe.config
+D:\Projects\SPUtility\IsHubEmulator\bin\Debug\IsHubEmulator.exe
+D:\Projects\SPUtility\IsHubEmulator\bin\Debug\IsHubEmulator.pdb
+D:\Projects\SPUtility\IsHubEmulator\obj\Debug\IsHubEmulator.csprojResolveAssemblyReference.cache
+D:\Projects\SPUtility\IsHubEmulator\obj\Debug\IsHubEmulator.exe
+D:\Projects\SPUtility\IsHubEmulator\obj\Debug\IsHubEmulator.pdb
+D:\Projects\SPUtility\IsHubEmulator\bin\Debug\IsHubLib.dll
+D:\Projects\SPUtility\IsHubEmulator\bin\Debug\SPLib.dll
+D:\Projects\SPUtility\IsHubEmulator\bin\Debug\Xceed.Wpf.Toolkit.dll
+D:\Projects\SPUtility\IsHubEmulator\bin\Debug\IsHubLib.pdb
+D:\Projects\SPUtility\IsHubEmulator\bin\Debug\SPLib.pdb

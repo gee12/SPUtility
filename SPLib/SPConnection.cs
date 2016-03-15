@@ -8,17 +8,17 @@ namespace SPLib
 {
     public class SPConnection
     {
-        public static string[] Ports =
-        {
-            "COM1",
-            "COM2",
-            "COM3",
-            "COM4",
-            "COM5",
-            "COM6",
-            "COM7",
-            "COM8",
-        };
+        public static string[] Ports;
+        //{
+        //    "COM1",
+        //    "COM2",
+        //    "COM3",
+        //    "COM4",
+        //    "COM5",
+        //    "COM6",
+        //    "COM7",
+        //    "COM8",
+        //};
 
         public static int[] BaudRates = 
         {
@@ -29,6 +29,7 @@ namespace SPLib
             4800,
             9600,
             14400,
+            19200,
             28800,
             36000,
             115000
@@ -64,21 +65,32 @@ namespace SPLib
             this.buffer = new List<byte[]>();
 
             this.port.DataReceived += new SerialDataReceivedEventHandler(OnDataReceived);
+
+            Ports = new string[50];
+            for (int i = 0; i < 50; i++)
+            {
+                Ports[i] = "COM" + (i + 1).ToString();
+            }
         }
 
         void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            //Thread.Sleep(500);
-            //string data = this.port.ReadExisting();
-            int length = this.port.BytesToRead;
-            byte[] bytes = new byte[length];
-            //int r = this.port.Read(bytes, 0, length);
-            //string data = Encoding.Default.GetString(bytes);
-            //tbData.Dispatcher.Invoke(new DataReceivedDeleg(DataReceived), new object[] { data });
-            //tbData.Dispatcher.Invoke(new DataReceivedDeleg(ReceiveData), bytes);
-            this.port.Read(bytes, 0, length);
-            //ReceiveData(bytes);
-            DataReceivingHandler.Invoke(bytes);
+            //try
+            //{
+            //    //Thread.Sleep(500);
+            //    //string data = this.port.ReadExisting();
+            //    int length = this.port.BytesToRead;
+            //    byte[] bytes = new byte[length];
+            //    //int r = this.port.Read(bytes, 0, length);
+            //    //string data = Encoding.Default.GetString(bytes);
+            //    //tbData.Dispatcher.Invoke(new DataReceivedDeleg(DataReceived), new object[] { data });
+            //    //tbData.Dispatcher.Invoke(new DataReceivedDeleg(ReceiveData), bytes);
+            //    this.port.Read(bytes, 0, length);
+            //    //ReceiveData(bytes);
+            //    if (DataReceivingHandler != null)
+            //        DataReceivingHandler.Invoke(bytes);
+            //}
+            //catch { }
         }
 
         /// <summary>
@@ -156,23 +168,71 @@ namespace SPLib
                 System.Buffer.BlockCopy(array, 0, bytes, offset, array.Length);
                 offset += array.Length;
             }
-            
+
             SendData(bytes);
             ClearBuffer();
 
             return bytes;
         }
 
-        void SendData(byte[] bytes)
+        public void SendData(byte[] bytes)
         {
-            this.port.Write(bytes, 0, bytes.Length);
-            //var s = string.Join(" ", bytes);
-            //Log.Add("Отправлено: " + s);
+            try
+            {
+                this.port.Write(bytes, 0, bytes.Length);
+            }
+            catch {}
         }
 
         void ClearBuffer()
         {
             this.buffer.Clear();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public byte[] ReadData()
+        {
+            byte[] bytes = null;
+            byte[] actualBytes = null;
+            int length = this.port.ReadBufferSize;
+            int actualLength = 0;
+
+            try
+            {
+                do
+                {
+                    // read
+                    bytes = new byte[length];
+                    actualLength = this.port.Read(bytes, 0, bytes.Length);
+
+                    if (actualBytes == null)
+                    {
+                        // first bytes array
+                        actualBytes = new byte[actualLength];
+                        System.Buffer.BlockCopy(bytes, 0, actualBytes, 0, actualLength);
+                    }
+                    else
+                    {
+                        // join arrays
+                        byte[] temp = new byte[actualLength + actualBytes.Length];
+                        System.Buffer.BlockCopy(actualBytes, 0, temp, 0, actualBytes.Length);
+                        System.Buffer.BlockCopy(bytes, 0, temp, actualBytes.Length, actualLength);
+                        actualBytes = temp;
+                    }
+                }
+                while (this.port.BytesToRead > 0);
+            }
+            catch (TimeoutException ex)
+            {
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            return actualBytes;
         }
 
         /// <summary>
@@ -208,6 +268,12 @@ namespace SPLib
             port.DataBits = src.DataBits;
             port.StopBits = src.StopBits;
             port.Parity = src.Parity;
+        }
+
+        public string ToString()
+        {
+            return string.Format("{0},{1},{2},{3},{4},{5},{6}", 
+                port.PortName, port.BaudRate, port.DataBits, port.StopBits, port.Parity, port.ReadTimeout, port.WriteTimeout);
         }
     }
 }

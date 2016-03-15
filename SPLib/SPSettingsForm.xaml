@@ -6,7 +6,8 @@
              xmlns:ports="clr-namespace:System.IO.Ports;assembly=System"
              WindowStartupLocation="CenterOwner" ResizeMode="NoResize" 
              Title="Параметры COM-порта"
-             x:Name="_this" SizeToContent="WidthAndHeight" Width="200" Icon="ico.ico">
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             x:Name="_this" SizeToContent="WidthAndHeight" Width="260" Icon="ico.ico">
     <Window.Resources>
         <Image x:Key="accept_32" Source="Resources/accept_32.png"/>
         <Image x:Key="cancel_32" Source="Resources/cancel_32.png"/>
@@ -41,8 +42,8 @@
         <!--<Grid Margin="10" x:Name="gMain" DataContext="{Binding ElementName=_this, Path=SerialPort, Mode=TwoWay}">-->
         <Grid Margin="10" x:Name="gMain" >
             <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="28"/>
@@ -50,7 +51,8 @@
                 <RowDefinition Height="28"/>
                 <RowDefinition Height="28"/>
                 <RowDefinition Height="28"/>
-                <RowDefinition />
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="28"/>
             </Grid.RowDefinitions>
 
             <!---->
@@ -59,6 +61,8 @@
             <Label Content="Биты:"          Grid.Row="2"/>
             <Label Content="Стоп.биты:"     Grid.Row="3"/>
             <Label Content="Четность:"      Grid.Row="4"/>
+            <Label Content="Таймаут чтения, мсек:"      Grid.Row="5"/>
+            <Label Content="Таймаут записи, мсек:"      Grid.Row="6"/>
 
             <!---->
             <ComboBox x:Name="cbPort"       Margin="0,2" Grid.Column="1"
@@ -71,6 +75,10 @@
                        ItemsSource="{Binding Source={StaticResource stopBitsValues}}" SelectedItem="{Binding StopBits, Mode=TwoWay}"/>
             <ComboBox x:Name="cbParity"     Margin="0,2" Grid.Column="1" Grid.Row="4"
                        ItemsSource="{Binding Source={StaticResource parityValues}}" SelectedItem="{Binding Parity, Mode=TwoWay}"/>
+            <xctk:IntegerUpDown x:Name="tbReadTimeout" Minimum="10" Grid.Row="5" Grid.Column="1" Margin="0,2"
+                                Value="{Binding Path=ReadTimeout, Mode=TwoWay}"/>
+            <xctk:IntegerUpDown x:Name="tbWriteTimeout" Minimum="10" Grid.Row="6" Grid.Column="1" Margin="0,2"
+                                Value="{Binding Path=WriteTimeout, Mode=TwoWay}"/>
         </Grid>
 
 

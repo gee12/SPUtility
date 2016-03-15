@@ -72,6 +72,9 @@ namespace SPLib
                 SerialPort.DataBits = SPConnection.DataBits[0];
                 //SerialPort.StopBits = StopBits.None;
                 SerialPort.Parity = Parity.None;
+
+                SerialPort.ReadTimeout = 500;
+                SerialPort.WriteTimeout = 500;
             }
             else SerialPort = port;
             gMain.DataContext = SerialPort;
