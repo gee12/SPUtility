@@ -117,7 +117,7 @@ namespace TestApp
             if (form.ShowModal(this.spConnection.Port))
             {
                 //this.port = form.SerialPort;
-                this.spConnection.SetPortSettings(form.SerialPort);
+                this.spConnection.SetPortSettings(form.SP);
                 Log.Add("Параметры COM-порта успешно изменены");
             }
         }

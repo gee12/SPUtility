@@ -5,7 +5,8 @@
         xmlns:lib="clr-namespace:SPLib;assembly=SPLib"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         x:Class="IsHubApp.MainWindow"
-        Title="Is-Hub Utility" Width="500" Height="400" WindowStartupLocation="CenterScreen">
+        Title="Is-Hub Utility" Width="500" Height="400" WindowStartupLocation="CenterScreen"
+        Closed="Window_Closed">
     <!--xmlns:lib="clr-namespace:SPLib"-->
     <Window.Resources>
         <lib:NegateConverter x:Key="negate" />
@@ -19,8 +20,8 @@
 
         <CommandBinding Command="local:AppCommands.InitCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
         <CommandBinding Command="local:AppCommands.StartPollCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
-        <CommandBinding Command="local:AppCommands.PollTimerCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
-        <!--<CommandBinding Command="local:AppCommands.StopPollCommand" Executed="CommandBinding_Executed"/>-->
+        <!--<CommandBinding Command="local:AppCommands.PollTimerCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>-->
+        <CommandBinding Command="local:AppCommands.StopPollCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
         <CommandBinding Command="local:AppCommands.StartFlowCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
         <CommandBinding Command="local:AppCommands.DoseCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
         <CommandBinding Command="local:AppCommands.StopFlowCommand" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>
@@ -35,10 +36,13 @@
 
         <!-- -->
         <Menu x:Name="mainMenu" >
-            <MenuItem Header="Файл">
+            <MenuItem Header="Порт">
                 <MenuItem Header="Параметры COM-порта" Command="local:AppCommands.ShowPortSettingsFormCommand" />
                 <MenuItem Header="Открыть порт" Command="local:AppCommands.OpenPortCommand"/>
                 <MenuItem Header="Закрыть порт" Command="local:AppCommands.ClosePortCommand"/>
+            </MenuItem>
+            <MenuItem Header="Настройки">
+                <MenuItem x:Name="cbIsSaveParameters" Header="Сохранять настройки" IsCheckable="True" />
             </MenuItem>
             <MenuItem Header="О программе" Command="local:AppCommands.AboutCommand"/>
         </Menu>
@@ -52,20 +56,22 @@
             <!---->
             <Grid Grid.Row="0" Margin="10,10,5,0" >
                 <StackPanel  HorizontalAlignment="Left" Orientation="Horizontal">
-                    <Button Content="Инициализировать" Command="local:AppCommands.InitCommand"/>
-                    <Button Content="Опросить" Grid.Column="1" Margin="5,0" 
-                        Command="local:AppCommands.StartPollCommand"/>
-                    <!--<Button Content="Остановить" Grid.Column="1" Margin="5,0"
-                        Command="local:AppCommands.StopPollCommand" Background="LightPink"/>-->
+                    <!--<Button Content="Инициализировать" Command="local:AppCommands.InitCommand"/>-->
+                    <Button Content="Начать опрос" Grid.Column="1" Margin="5,0" 
+                                        Command="local:AppCommands.StartPollCommand"/>
 
-            <StackPanel Orientation="Horizontal">
-                <CheckBox x:Name="cbAutoPoll" Content="Опрашивать каждые" Margin="5,0" VerticalAlignment="Center"
-                                  Command="local:AppCommands.PollTimerCommand" />
-                <xctk:IntegerUpDown x:Name="tbPollTimeout" Width="60" Value="500" Minimum="10" 
-                                    IsEnabled="{Binding ElementName=cbAutoPoll, Path=IsChecked, Converter={StaticResource negate}}"/>
-                <TextBlock Text="мсек" Margin="2,0,5,0" VerticalAlignment="Center"/>
-                <!--<Button Content="Применить" Command="local:AppCommands.PollTimerCommand"/>-->
-            </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <!--<CheckBox x:Name="cbAutoPoll" Content="Опрашивать каждые" Margin="5,0" VerticalAlignment="Center"
+                                                                  Command="local:AppCommands.PollTimerCommand" />-->
+                        <!--<xctk:IntegerUpDown x:Name="tbPollTimeout" Width="60" Value="500" Minimum="10" 
+                                                                    IsEnabled="{Binding ElementName=cbAutoPoll, Path=IsChecked, Converter={StaticResource negate}}"/>-->
+                        <xctk:IntegerUpDown x:Name="tbPollTimeout" Width="60" Value="100" Minimum="10" />
+                        <!--IsEnabled="{Binding IsAutoPoll, Converter={StaticResource negate}}"/>-->
+                        <TextBlock Text="мсек" Margin="2,0,5,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <Button Content="Остановить" Grid.Column="1" Margin="5,0"
+                            Command="local:AppCommands.StopPollCommand"/>
             </StackPanel>
 
         </Grid>
@@ -89,7 +95,7 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     
-                    <Grid Width="130" HorizontalAlignment="Left" Margin="5">
+                    <Grid x:Name="gPistolRadioButtons" Width="130" HorizontalAlignment="Left" Margin="5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
@@ -114,14 +120,14 @@
                         <RadioButton Content="4" GroupName="GunsRadioGroup" Grid.Column="1" Grid.Row="4" Tag="7" Click="RadioButton_Click"/>
                     </Grid>
                     <StackPanel Margin="0,5" Grid.Column="1">
-                        <Button Content="Начать отпуск" Margin="15,5,5,0" 
+                        <Button Content="Начать отпуск" Margin="15,5,5,0"
                             Command="local:AppCommands.StartFlowCommand"/>
                         <Button Content="Обнов. отпуск" Margin="15,5,5,0" 
                             Command="local:AppCommands.DoseCommand"/>
                         <Button Content="Остановить" Margin="15,5,5,0" 
                             Command="local:AppCommands.StopFlowCommand"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Grid.Row="1" Grid.ColumnSpan="2">
+                    <StackPanel x:Name="gAlgRadioButtons" Orientation="Horizontal" Margin="0,10,0,0" Grid.Row="1" Grid.ColumnSpan="2">
                         <RadioButton Content="Алгоритм 1   " GroupName="AlgRadioGroup" Tag="1" Click="AlgRadioButton_Click" IsChecked="True"/>
                         <RadioButton Content="Алгоритм 2" GroupName="AlgRadioGroup" Tag="2" Click="AlgRadioButton_Click"/>
                     </StackPanel>
@@ -170,7 +176,8 @@
                             <!--/>-->
                         </Grid>
                         <CheckBox Content="На связи" IsChecked="{Binding IsOnline, Mode=OneWay}" IsHitTestVisible="False"/>
-                        <CheckBox Content="Передача данных" IsChecked="{Binding IsFree, Mode=OneWay, Converter={StaticResource negate}}" IsHitTestVisible="False" Margin="0,5"/>
+                        <!--<CheckBox Content="Передача данных" IsChecked="{Binding IsFree, Mode=OneWay, Converter={StaticResource negate}}" IsHitTestVisible="False" Margin="0,5"/>-->
+                        <!--<CheckBox Content="Возможен отпуск" IsChecked="{Binding IsFlowAllowed, Mode=OneWay}" IsHitTestVisible="False" Margin="0,0,0,5"/>-->
                     </StackPanel>
                 </GroupBox>
             </Grid>

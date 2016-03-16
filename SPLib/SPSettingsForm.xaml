@@ -7,7 +7,7 @@
              WindowStartupLocation="CenterOwner" ResizeMode="NoResize" 
              Title="Параметры COM-порта"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             x:Name="_this" SizeToContent="WidthAndHeight" Width="260" Icon="ico.ico">
+             x:Name="_this" SizeToContent="Height" Width="270" Icon="ico.ico">
     <Window.Resources>
         <Image x:Key="accept_32" Source="Resources/accept_32.png"/>
         <Image x:Key="cancel_32" Source="Resources/cancel_32.png"/>
@@ -31,6 +31,7 @@
         <CommandBinding Command="local:AppCommands.TestCommand" Executed="CommandBinding_Executed" />
         <CommandBinding Command="local:AppCommands.ApplyCommand" Executed="CommandBinding_Executed" />
         <CommandBinding Command="local:AppCommands.CancelCommand" Executed="CommandBinding_Executed" />
+        <CommandBinding Command="local:AppCommands.AvailablePortsCommand" Executed="CommandBinding_Executed" />
     </Window.CommandBindings>
 
     <Grid>
@@ -42,8 +43,9 @@
         <!--<Grid Margin="10" x:Name="gMain" DataContext="{Binding ElementName=_this, Path=SerialPort, Mode=TwoWay}">-->
         <Grid Margin="10" x:Name="gMain" >
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="105"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="40"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="28"/>
@@ -57,41 +59,54 @@
 
             <!---->
             <Label Content="Порт:" />
-            <Label Content="Бит/сек:"   Grid.Row="1"/>
+            <Label Content="Скорость:"   Grid.Row="1"/>
             <Label Content="Биты:"          Grid.Row="2"/>
-            <Label Content="Стоп.биты:"     Grid.Row="3"/>
-            <Label Content="Четность:"      Grid.Row="4"/>
-            <Label Content="Таймаут чтения, мсек:"      Grid.Row="5"/>
-            <Label Content="Таймаут записи, мсек:"      Grid.Row="6"/>
+            <Label Content="Четность:"      Grid.Row="3"/>
+            <Label Content="Стоп.биты:"     Grid.Row="4"/>
+            <Label Content="Таймаут чтения:"      Grid.Row="5"/>
+            <Label Content="Таймаут записи:"      Grid.Row="6"/>
 
             <!---->
-            <ComboBox x:Name="cbPort"       Margin="0,2" Grid.Column="1"
-                      ItemsSource="{Binding Source={x:Static local:SPConnection.Ports}}" SelectedItem="{Binding PortName, Mode=TwoWay}" />
-            <ComboBox x:Name="cbBaudRate"   Margin="0,2" Grid.Column="1" Grid.Row="1"
-                      ItemsSource="{Binding Source={x:Static local:SPConnection.BaudRates}}" SelectedItem="{Binding BaudRate, Mode=TwoWay}"/>
+            <ComboBox x:Name="cbPort"       Margin="0,2" Grid.Column="1" IsEditable="True"
+                      Text="{Binding PortName, Mode=TwoWay}" />
+                      <!--ItemsSource="{Binding Source={x:Static local:SPConnection.Ports}}"--> 
+            <ComboBox x:Name="cbBaudRate"   Margin="0,2" Grid.Column="1" Grid.Row="1" IsEditable="True"
+                      ItemsSource="{Binding Source={x:Static local:SPConnection.BaudRates}}" Text="{Binding BaudRate, Mode=TwoWay}"/>
             <ComboBox x:Name="cbDataBits"   Margin="0,2" Grid.Column="1" Grid.Row="2"
                       ItemsSource="{Binding Source={x:Static local:SPConnection.DataBits}}" SelectedItem="{Binding DataBits, Mode=TwoWay}"/>
-            <ComboBox x:Name="cbStopBits"   Margin="0,2" Grid.Column="1" Grid.Row="3"
-                       ItemsSource="{Binding Source={StaticResource stopBitsValues}}" SelectedItem="{Binding StopBits, Mode=TwoWay}"/>
-            <ComboBox x:Name="cbParity"     Margin="0,2" Grid.Column="1" Grid.Row="4"
+            <ComboBox x:Name="cbParity"     Margin="0,2" Grid.Column="1" Grid.Row="3"
                        ItemsSource="{Binding Source={StaticResource parityValues}}" SelectedItem="{Binding Parity, Mode=TwoWay}"/>
-            <xctk:IntegerUpDown x:Name="tbReadTimeout" Minimum="10" Grid.Row="5" Grid.Column="1" Margin="0,2"
+            <ComboBox x:Name="cbStopBits"   Margin="0,2" Grid.Column="1" Grid.Row="4"
+                       ItemsSource="{Binding Source={StaticResource stopBitsValues}}" SelectedItem="{Binding StopBits, Mode=TwoWay}"/>
+            <xctk:IntegerUpDown x:Name="tbReadTimeout" Minimum="-1" Grid.Row="5" Grid.Column="1" Margin="0,2"
                                 Value="{Binding Path=ReadTimeout, Mode=TwoWay}"/>
-            <xctk:IntegerUpDown x:Name="tbWriteTimeout" Minimum="10" Grid.Row="6" Grid.Column="1" Margin="0,2"
+            <xctk:IntegerUpDown x:Name="tbWriteTimeout" Minimum="-1" Grid.Row="6" Grid.Column="1" Margin="0,2"
                                 Value="{Binding Path=WriteTimeout, Mode=TwoWay}"/>
+
+            <!--<Button Width="24" Height="24" Grid.Column="2" Margin="5,0" HorizontalAlignment="Left" Command="local:AppCommands.AvailablePortsCommand"/>-->
+            <CheckBox x:Name="cbIsAvailablePorts" Grid.Column="2" Margin="5,0" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Показывать только доступные"
+                      Command="local:AppCommands.AvailablePortsCommand"/>
+                      <!--IsChecked="{Binding IsShowAvailablePorts, Mode=TwoWay}"--> 
+            <Label Content="бит/с"   Grid.Row="1" Grid.Column="2"/>
+            <Label Content="мсек"      Grid.Row="5" Grid.Column="2"/>
+            <Label Content="мсек"      Grid.Row="6" Grid.Column="2"/>
         </Grid>
 
-
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Background="LightGray">
-
+        <Grid Grid.Row="1" Background="LightGray">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
             <Button x:Name="bApply" Height="40" Width="40" ToolTip="Сохранить (Ctrl+Enter)" Command="local:AppCommands.ApplyCommand"
                     Margin="10" Content="{StaticResource accept_32}" />
             <Button x:Name="bCancel" Height="40" Width="40" ToolTip="Отмена (Esc)" Command="local:AppCommands.CancelCommand"
-                    Margin="0,10,10,10" Content="{StaticResource cancel_32}" />
+                    Margin="0,10,10,10" Content="{StaticResource cancel_32}" Grid.Column="1"/>
             <Button x:Name="bTest" Height="30" Width="50" ToolTip="Отмена (Esc)" Command="local:AppCommands.TestCommand"
-                    Margin="20,10,10,10" Content="Тест" HorizontalAlignment="Left" />
+                    Margin="20,10,20,10" Content="Тест" HorizontalAlignment="Right" Grid.Column="2"/>
 
-        </StackPanel>
+        </Grid>
 
         <local:CircularProgressBar x:Name="pbCircular" Visibility="Collapsed"/>
         

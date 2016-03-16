@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -26,20 +27,20 @@ namespace IsHubLib
             public abstract int Define(byte[] buf);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public enum Modes
-        {
-            NONE,
-            INIT,
-            START_POLL,
-            //STOP_POLL,
-            START_FLOW,
-            STOP_FLOW1,
-            STOP_FLOW2,
-            DOSE
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        //public enum Modes
+        //{
+        //    NONE,
+        //    INIT,
+        //    POLL,
+        //    //STOP_POLL,
+        //    START_FLOW,
+        //    STOP_FLOW1,
+        //    STOP_FLOW2,
+        //    DOSE
+        //}
 
         /// <summary>
         /// 
@@ -56,13 +57,13 @@ namespace IsHubLib
         public virtual byte[] DOSE_ANSWER { get { return null; } }
         public virtual byte[] STOP_FLOW_ANSWER { get { return null; } }
 
-        public const int DEF_READ_TIMEOUT = 3000;
-        public const int DEF_WRITE_TIMEOUT = 3000;
+        public const int DEF_READ_TIMEOUT = SerialPort.InfiniteTimeout;
+        public const int DEF_WRITE_TIMEOUT = SerialPort.InfiniteTimeout;
 
         /// <summary>
         /// Properties
         /// </summary>
-        public bool IsOnline { get { return isOnline; } protected set { isOnline = value; NotifyPropertyChanged("IsOnline"); } }
+        public bool IsOnline { get { return isOnline && ComPort.IsPortOpened; } protected set { isOnline = value; NotifyPropertyChanged("IsOnline"); } }
         public bool IsFree { get { return isFree; } protected set { isFree = value; NotifyPropertyChanged("IsFree"); } }
         public byte Side1Info { get { return side1Info; } protected set { side1Info = value; NotifyPropertyChanged("Side1Info"); } }
         public byte Side2Info { get { return side2Info; } protected set { side2Info = value; NotifyPropertyChanged("Side2Info"); } }
@@ -82,7 +83,7 @@ namespace IsHubLib
         protected int currentDose;
 
         protected int CurPistol;
-        protected Modes curMode = Modes.NONE;
+        //protected Modes curMode = Modes.NONE;
 
         public SPConnection ComPort { get; protected set; }
         public DoseAlgorithms DoseAlgorithm;
@@ -105,7 +106,6 @@ namespace IsHubLib
             this.DataSentHandler = sentHandler;
 
             Init();
-            //this.ComPort.DataReceivingHandler = receivedHandler;
         }
 
         private void Init()
@@ -137,25 +137,8 @@ namespace IsHubLib
             byte[] receivedData = null;
             new Thread(() =>
             {
-                receivedData = _DataCommunication(dataToSend, onDataReceived);
-            }).Start();
-
-            //Func<byte[], Action<byte[]>, byte[]> func = _DataCommunication;
-            //func.BeginInvoke(dataToSend, onDataReceived, null, null);
-
-            return receivedData;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        protected byte[] _DataCommunication(byte[] dataToSend, Action<byte[]> onDataReceived)
-        {
-            byte[] receivedData = null;
-            //new Thread(() =>
-            //{
+                //receivedData = _DataCommunication(dataToSend, onDataReceived);
                 this.IsFree = false;
-                //dispatcher.Invoke((Action)(() => post(form, res)));
 
                 // send
                 this.ComPort.SendData(dataToSend);
@@ -175,7 +158,10 @@ namespace IsHubLib
                 // handle data receiving
                 if (onDataReceived != null)
                     onDataReceived.Invoke(receivedData);
-            //}).Start();
+            }).Start();
+
+            //Func<byte[], Action<byte[]>, byte[]> func = _DataCommunication;
+            //func.BeginInvoke(dataToSend, onDataReceived, null, null);
 
             return receivedData;
         }
@@ -185,16 +171,8 @@ namespace IsHubLib
         /// </summary>
         public virtual void SendInit()
         {
-            this.curMode = Modes.INIT;
-            //this.comPort.AddData(INIT_COMMAND);
-            //this.comPort.SendData();
-            //DataSentHandler.Invoke(INIT_COMMAND);
-
-            //byte[] bytes = this.comPort.ReadData();
-            //DataReceivedHandler.Invoke(bytes);
-            //ReceiveInit(bytes);
-
-            var bytes = DataCommunication(INIT_COMMAND, ReceiveInit);
+            //this.curMode = Modes.INIT;
+            DataCommunication(INIT_COMMAND, ReceiveInit);
             //ReceiveInit(bytes);
         }
 
@@ -208,8 +186,8 @@ namespace IsHubLib
         /// </summary>
         public virtual void SendPoll()
         {
-            this.curMode = Modes.START_POLL;
-            var bytes = DataCommunication(POLL_COMMAND, ReceivePoll);
+            //this.curMode = Modes.POLL;
+            DataCommunication(POLL_COMMAND, ReceivePoll);
             //ReceivePoll(bytes);
         }
 
@@ -223,8 +201,8 @@ namespace IsHubLib
         public virtual void SendStartFlow(int pistol)
         {
             if (pistol < 0 || pistol > pistols) return;
-            this.curMode = Modes.START_FLOW;
-            var bytes = DataCommunication(START_FLOW_COMMAND, ReceivePoll);
+            //this.curMode = Modes.START_FLOW;
+            DataCommunication(START_FLOW_COMMAND, ReceivePoll);
             //ReceivePoll(bytes);
         }
 
@@ -247,8 +225,8 @@ namespace IsHubLib
         protected virtual void SendStopFlow(int pistol)
         {
             if (pistol < 0 || pistol > pistols) return;
-            this.curMode = Modes.STOP_FLOW1;
-            byte[] bytes = DataCommunication(DOSE_COMMAND, ReceiveStopFlow);
+            //this.curMode = Modes.STOP_FLOW1;
+            DataCommunication(DOSE_COMMAND, ReceiveStopFlow);
             //ReceiveStopFlow(bytes);
         }
 
@@ -271,8 +249,8 @@ namespace IsHubLib
         protected virtual void SendDose(int pistol)
         {
             if (pistol < 0 || pistol > pistols) return;
-            this.curMode = Modes.DOSE;
-            byte[] bytes = DataCommunication(DOSE_COMMAND, ReceiveDose);
+            //this.curMode = Modes.DOSE;
+            DataCommunication(DOSE_COMMAND, ReceiveDose);
             //ReceiveDose(bytes);
         }
 
@@ -286,34 +264,38 @@ namespace IsHubLib
             this.currentDose = (DoseAlgorithm != null) ? DoseAlgorithm.Define(bytes) : 0;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        //public void Receive(byte[] bytes)
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        //public void OnTimerTick()
         //{
 
         //    switch (curMode)
         //    {
         //        case Modes.INIT:
-        //            ReceiveInit(bytes);
+        //            SendInit();
         //            break;
         //        case Modes.START_POLL:
-        //            ReceivePoll(bytes);
+        //            SendPoll();
         //            break;
         //        case Modes.START_FLOW:
-        //            ReceiveStartFlow(bytes);
+        //            SendStartFlow();
         //            break;
 
         //        // ОШИБКА
         //        case Modes.STOP_FLOW1:
         //        case Modes.STOP_FLOW2:
-        //            ReceiveStopFlow(bytes);
+        //            SendStopFlow();
         //            break;
 
         //        default:
         //            break;
         //    }
         //}
+        public virtual void OnTimerTick()
+        {
+
+        }
 
 
         public event PropertyChangedEventHandler PropertyChanged;

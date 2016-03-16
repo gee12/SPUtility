@@ -23,15 +23,15 @@ namespace IsHubApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static readonly string ASSEMBLY_NAME = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
-        public static readonly string LOG_PATH = ".";
-
-        IsHub isHub { get; set; }
+        Gilbarco isHub { get; set; }
         Timer autoPollTimer;
         //bool isPollStarted = false;
         int curPistol;
+        bool IsSaveParameters { get { return cbIsSaveParameters.IsChecked; } set { cbIsSaveParameters.IsChecked = value; } }
 
-        bool IsAutoPoll { get { return cbAutoPoll.IsChecked.GetValueOrDefault(); } set { cbAutoPoll.IsChecked = value; } }
+        //bool IsAutoPoll { get { return cbAutoPoll.IsChecked.GetValueOrDefault(); } set { cbAutoPoll.IsChecked = value; } }
+        bool isAutoPoll;
+        bool IsAutoPoll { get { return isAutoPoll; } set { isAutoPoll = value; tbPollTimeout.IsEnabled = !value; } }
 
         /// <summary>
         /// 
@@ -41,7 +41,8 @@ namespace IsHubApp
             InitializeComponent();
             Closing += MainWindow_Closing;
 
-            Log.Init(ASSEMBLY_NAME, LOG_PATH, false, WriteLog);
+            //Log.Init(ASSEMBLY_NAME, LOG_PATH, false, WriteLog);
+            Log.LogHandler = WriteLog;
 
             this.isHub = new Gilbarco(Gilbarco.GilbarcoDoseAlgorithms.Algorithm1, DataSent, DataReceived);
 
@@ -51,7 +52,51 @@ namespace IsHubApp
 
             gIndicators.DataContext = isHub;
 
+            InitFromConfig();
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public void InitFromConfig()
+        {
+            IsHubConfig config = App.CurrentConfig;
+            IsSaveParameters = config.IsSaveParameters;
+
+            if (IsSaveParameters)
+            {
+                var port = this.isHub.ComPort.Port;
+                port.PortName = config.PortName;
+                port.BaudRate = config.BaudRate;
+                port.DataBits = config.DataBits;
+                port.StopBits = config.StopBits;
+                port.Parity = config.Parity;
+                port.ReadTimeout = config.ReadTimeout;
+                port.WriteTimeout = config.WriteTimeout;
+
+                tbPollTimeout.Value = config.TimerMsec;
+
+                var pistolRB = GetRadioButtonFromTag(gPistolRadioButtons.Children, config.Pistol.ToString());
+                if (pistolRB != null) pistolRB.IsChecked = true;
+                this.curPistol = config.Pistol;
+
+                var algRB = GetRadioButtonFromTag(gAlgRadioButtons.Children, config.DoseAlgorithm.ToString());
+                if (algRB != null) algRB.IsChecked = true;
+                this.isHub.DoseAlgorithm = Gilbarco.GilbarcoDoseAlgorithms.FromValue<Gilbarco.GilbarcoDoseAlgorithms>(config.DoseAlgorithm);
+            }
+        }
+
+        static RadioButton GetRadioButtonFromTag(UIElementCollection collection, string tag)
+        {
+            foreach (var child in collection)
+            {
+                RadioButton rb = child as RadioButton;
+                if (rb != null && rb.Tag.ToString() == tag)
+                {
+                    return rb;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -78,18 +123,22 @@ namespace IsHubApp
                 ClosePort();
             }
             // init connect
-            else if (AppCommands.InitCommand.Equals(command))
-            {
-                Init();
-            }
+            //else if (AppCommands.InitCommand.Equals(command))
+            //{
+            //    Init();
+            //}
             // poll
             else if (AppCommands.StartPollCommand.Equals(command))
             {
                 StartPoll();
             }
-            else if (AppCommands.PollTimerCommand.Equals(command))
+            //else if (AppCommands.PollTimerCommand.Equals(command))
+            //{
+            //    PollTimer();
+            //}
+            else if (AppCommands.StopPollCommand.Equals(command))
             {
-                PollTimer();
+                StopPoll();
             }
             // flow
             else if (AppCommands.StartFlowCommand.Equals(command))
@@ -118,7 +167,7 @@ namespace IsHubApp
             if (AppCommands.ShowPortSettingsFormCommand.Equals(command))
             {
                 e.CanExecute = !this.isHub.ComPort.IsPortOpened;
-            }
+            } 
             else if (AppCommands.OpenPortCommand.Equals(command))
             {
                 e.CanExecute = !this.isHub.ComPort.IsPortOpened;
@@ -128,35 +177,46 @@ namespace IsHubApp
                 e.CanExecute = this.isHub.ComPort.IsPortOpened;
             }
             // init
-            else if (AppCommands.InitCommand.Equals(command))
+            //else if (AppCommands.InitCommand.Equals(command))
+            //{
+            //    e.CanExecute = this.isHub.ComPort.IsPortOpened && !this.isHub.IsOnline && this.isHub.IsFree;
+            //}
+            else if (AppCommands.StopPollCommand.Equals(command))
             {
-                e.CanExecute = this.isHub.ComPort.IsPortOpened && !this.isHub.IsOnline && this.isHub.IsFree;
+                e.CanExecute = IsAutoPoll;
             }
             //////////// IsOnline
             //else if (!this.isHub.IsOnline || !this.isHub.IsFree)
+            //else if (!this.isHub.IsFree)
             //{
             //    e.CanExecute = false;
             //}
             // poll
+            //else if (AppCommands.StartPollCommand.Equals(command))
+            //{
+            //    //e.CanExecute = !this.isHub.IsFlowAllowed;
+            //    e.CanExecute = true;
+            //}
+            //else if (AppCommands.PollTimerCommand.Equals(command))
             else if (AppCommands.StartPollCommand.Equals(command))
             {
-                //e.CanExecute = !this.isHub.IsFlowAllowed;
-                e.CanExecute = true;
-            }
-            else if (AppCommands.PollTimerCommand.Equals(command))
-            {
-                if (!cbAutoPoll.IsChecked.Value)
+                //if (!cbAutoPoll.IsChecked.Value)
+                if (this.isHub.ComPort.IsPortOpened && !IsAutoPoll)
                 {
                     int res;
                     bool parsed = Int32.TryParse(tbPollTimeout.Value.ToString(), out res);
                     e.CanExecute = parsed && res >= tbPollTimeout.Minimum;
                 }
-                else e.CanExecute = true;
+                //else e.CanExecute = false;
+            }
+            else if (!this.isHub.IsOnline)
+            {
+                e.CanExecute = false;
             }
             // flow
             else if (AppCommands.StartFlowCommand.Equals(command))
             {
-                e.CanExecute = !this.isHub.IsFlowAllowed;
+                e.CanExecute = !this.isHub.IsFlowAllowed && IsAutoPoll && isHub.IsOnePistolOnSide();
             }
             else if (AppCommands.DoseCommand.Equals(command))
             {
@@ -175,11 +235,14 @@ namespace IsHubApp
         {
             var form = new SPSettingsForm();
             form.Owner = this;
+            form.IsShowAvailablePorts = App.CurrentConfig.IsShowAvailablePorts;
             if (form.ShowModal(this.isHub.ComPort.Port))
             {
                 //this.port = form.SerialPort;
-                this.isHub.ComPort.SetPortSettings(form.SerialPort);
+                this.isHub.ComPort.SetPortSettings(form.SP);
                 Log.Add("Параметры COM-порта изменены");
+
+                App.CurrentConfig.IsShowAvailablePorts = form.IsShowAvailablePorts;
             }
         }
 
@@ -207,77 +270,119 @@ namespace IsHubApp
         /// <summary>
         /// 
         /// </summary>
-        void Init()
-        {
-            Log.Add("Инициализация");
-            this.isHub.SendInit();
-        }
-
+        //void StartPoll()
+        //{
+        //    Log.Add("Простой опрос вручную");
+        //    this.isHub.SendPoll();
+        //}
+        
         /// <summary>
         /// 
         /// </summary>
         void StartPoll()
         {
-            Log.Add("Простой опрос вручную");
-            this.isHub.SendPoll();
+            //StartInit();
+
+            ////System.Threading.Thread.Sleep(1000);
+
+            //if (this.isHub.IsOnline)
+            //{
+            //    StartAutoPoll();
+            //}
+
+            StartAutoPoll();
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
-        void PollTimer()
+        void StartInit()
         {
-            bool isNeedTimer = cbAutoPoll.IsChecked.GetValueOrDefault();
-            if (isNeedTimer)
-            {
-                int value = Int32.Parse(tbPollTimeout.Value.ToString());
-                autoPollTimer.Interval = value;
-                autoPollTimer.Start();
-            }
-            else
-            {
-                autoPollTimer.Stop();
-            }
-            tbPollTimeout.IsEnabled = !isNeedTimer;
+            Log.Add("Инициализация");
+            this.isHub.SendInit();
         }
 
+        void StartAutoPoll()
+        {
+            IsAutoPoll = true;
 
-        bool isFlowMode = false;
+            isHub.CurrentMode = Gilbarco.Modes.INIT;
+
+            this.isHub.SendInit();
+
+            tbLogs.Clear();
+
+            Log.Add("Порт: " + isHub.ComPort.ToString());
+            Log.Add("Запуск цикла опроса");
+            //bool isNeedTimer = cbAutoPoll.IsChecked.GetValueOrDefault();
+            //if (IsAutoPoll)
+            //{
+            int value = Int32.Parse(tbPollTimeout.Value.ToString());
+            autoPollTimer.Interval = value;
+            autoPollTimer.Start();
+            //}
+            //else
+            //{
+            //    autoPollTimer.Stop();
+            //}
+            //tbPollTimeout.IsEnabled = !IsAutoPoll;
+        }
+
+        //bool isFlowMode = false;
         /// <summary>
         /// 
         /// </summary>
         void PollTimerElapsed(object sender, ElapsedEventArgs e)
         {
+
+            this.Dispatcher.Invoke(() =>
+                {
+                    CommandManager.InvalidateRequerySuggested();
+                }
+            );
             //
-            if (!this.isHub.ComPort.IsPortOpened)
+            if (!this.isHub.ComPort.IsPortOpened)// || !this.isHub.IsOnline)
             {
                 autoPollTimer.Stop();
+                Log.Add("Остановка цикла опроса");
                 return;
             }
 
             //
-            if (this.isHub.IsFree)
-            {
-                // запускаем только простой опрос
-                if (!this.isHub.IsFlowAllowed)
-                {
-                    this.isHub.SendPoll();
-                }
-                else
-                {
-                    // запускаем простой опрос и опрос дозы по очереди
-                    if (isFlowMode)
-                    {
-                        this.isHub.SendDose();
-                    }
-                    else
-                    {
-                        this.isHub.SendPoll();
-                    }
-                    isFlowMode = !isFlowMode;
-                }
+            //if (this.isHub.IsFree)
+            //{
+            //    // запускаем только простой опрос
+            //    if (!this.isHub.IsFlowAllowed)
+            //    {
+            //        this.isHub.SendPoll();
+            //    }
+            //    else
+            //    {
+            //        // запускаем простой опрос и опрос дозы по очереди
+            //        if (isFlowMode)
+            //        {
+            //            this.isHub.SendDose();
+            //        }
+            //        else
+            //        {
+            //            this.isHub.SendPoll();
+            //        }
+            //        isFlowMode = !isFlowMode;
+            //    }
+            //}
+            //this.isHub.SendPoll();
+            //this.isHub.SendStartFlow(curPistol);
+            isHub.OnTimerTick();
+        }
 
-            }
+
+        void StopPoll()
+        {
+            IsAutoPoll = false;
+            //isHub.IsOnline = false;
+
+            Log.Add("Остановка цикла опроса");
+            autoPollTimer.Stop();
         }
 
         /// <summary>
@@ -285,8 +390,10 @@ namespace IsHubApp
         /// </summary>
         void StartFlow()
         {
-            Log.Add("Начать отпуск");
-            this.isHub.SendStartFlow(curPistol);
+            Log.Add("Запуск отпуска");
+            //this.isHub.SendStartFlow(curPistol);
+
+            isHub.CurrentMode = Gilbarco.Modes.START_FLOW;
         }
 
         /// <summary>
@@ -303,7 +410,7 @@ namespace IsHubApp
         /// </summary>
         void StopFlow()
         {
-            Log.Add("Закончить отпуск");
+            Log.Add("Остановка отпуска");
             this.isHub.SendStopFlow();
         }
 
@@ -313,11 +420,16 @@ namespace IsHubApp
         void DataSent(byte[] bytes)
         {
             if (bytes == null) return;
-            this.Dispatcher.Invoke((Action)(() =>
+
+            try
             {
-                var s = Utils.ToHexString(bytes);
-                Log.Add("Отправлено: " + s);
-            }));
+                this.Dispatcher.Invoke((Action)(() =>
+                {
+                    var s = Utils.ToHexString(bytes);
+                    Log.Add("Отправлено: " + s);
+                }));
+            }
+            catch { }
         }
 
         /// <summary>
@@ -325,18 +437,22 @@ namespace IsHubApp
         /// </summary>
         void DataReceived(byte[] bytes)
         {
-            this.Dispatcher.Invoke((Action)(() =>
+            try
             {
-                if (bytes == null)
+                this.Dispatcher.Invoke((Action)(() =>
                 {
-                    Log.Add("Нет ответа...");
-                }
-                else
-                {
-                    var s = Utils.ToHexString(bytes);
-                    Log.Add("Принято: " + s);
-                }
-            }));
+                    if (bytes == null)
+                    {
+                        Log.Add("Нет ответа...");
+                    }
+                    else
+                    {
+                        var s = Utils.ToHexString(bytes);
+                        Log.Add("Принято: " + s);
+                    }
+                }));
+            }
+            catch { }
         }
 
         /// <summary>
@@ -374,6 +490,33 @@ namespace IsHubApp
             RadioButton rb = sender as RadioButton;
             int algNum = Int32.Parse(rb.Tag.ToString());
             this.isHub.DoseAlgorithm = Gilbarco.GilbarcoDoseAlgorithms.FromValue<Gilbarco.GilbarcoDoseAlgorithms>(algNum);
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            if (autoPollTimer.Enabled)
+                autoPollTimer.Stop();
+
+            IsHubConfig config = App.CurrentConfig;
+            config.IsSaveParameters = IsSaveParameters;
+
+            if (IsSaveParameters)
+            {
+                var port = this.isHub.ComPort.Port;
+                config.PortName = port.PortName;
+                config.BaudRate = port.BaudRate;
+                config.DataBits = port.DataBits;
+                config.StopBits = port.StopBits;
+                config.Parity = port.Parity;
+                config.ReadTimeout = port.ReadTimeout;
+                config.WriteTimeout = port.WriteTimeout;
+
+                config.TimerMsec = tbPollTimeout.Value.GetValueOrDefault();
+                config.Pistol = this.curPistol;
+                config.DoseAlgorithm = this.isHub.DoseAlgorithm.Value;
+            }
+
+            config.WriteConfig();
         }
     }
 

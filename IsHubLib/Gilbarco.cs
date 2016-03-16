@@ -59,8 +59,8 @@ namespace IsHubLib
         /// <summary>
         /// 
         /// </summary>
-        public bool Pistol12 { get { return (Side1Info & 0x42) == 0x42; } }
         public bool Pistol11 { get { return (Side1Info & 0x41) == 0x41; } }
+        public bool Pistol12 { get { return (Side1Info & 0x42) == 0x42; } }
         public bool Pistol13 { get { return (Side1Info & 0x44) == 0x44; } }
         public bool Pistol14 { get { return (Side1Info & 0x48) == 0x48; } }
 
@@ -119,10 +119,46 @@ namespace IsHubLib
             this.Side1Info = bytes[2];
             this.Side2Info = bytes[3];
 
-            int flag = (Side1Info & 0x42);
-
             // update pistols properties
             NotifyPropertiesChanged();
+
+
+            // 1)
+            //this.IsFlowAllowed = this.IsFlowAllowed && IsPistolsMoreThanOneOnSide(Side1Info, Side2Info);
+
+            // 2)
+            if (IsFlowAllowed && IsPistolDrop(CurPistol, Side1Info, side2Info))
+            {
+                IsFlowAllowed = false;
+                CurrentMode = Modes.STOP_FLOW1;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        static bool IsPistolDrop(int pistol, byte side1, byte side2)
+        {
+            return ((pistol < 4 && (side1 & (1 << pistol)) == 0) 
+                || pistol >= 4 && (side2 & (1 << (pistol - 4))) == 0);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsOnePistolOnSide()
+        {
+            return IsOnePistolOnSide(Side1Info, Side2Info);
+        }
+
+        bool IsOnePistolOnSide(byte side1, byte side2)
+        {
+            return (OneBitSet((byte)(side1 & 0x0F)) && OneBitSet((byte)(side2 & 0x0F)));
+        }
+
+        static bool OneBitSet(byte b)
+        {
+            return ((b & (b - 1)) == 0);
         }
 
         /// <summary>
@@ -131,7 +167,7 @@ namespace IsHubLib
         public override void SendStartFlow(int pistol)
         {
             if (pistol < 0 || pistol > Pistols) return;
-            this.curMode = Modes.START_FLOW;
+            //this.curMode = Modes.START_FLOW;
             var res = (byte[])START_FLOW_COMMAND.Clone();
             res[0] = (byte)(res[0] + pistol);
             this.CurPistol = pistol;
@@ -160,8 +196,7 @@ namespace IsHubLib
         protected override void SendDose(int pistol)
         {
             if (pistol < 0 || pistol > Pistols) return;
-
-            this.curMode = Modes.DOSE;
+            //this.curMode = Modes.DOSE;
             var res = (byte[])DOSE_COMMAND.Clone();
             res[0] = (byte)(res[0] + pistol);
             byte[] bytes = DataCommunication(res, ReceiveDose);
@@ -189,7 +224,7 @@ namespace IsHubLib
         protected override void SendStopFlow(int pistol)
         {
             if (pistol < 0 || pistol > Pistols) return;
-            this.curMode = Modes.STOP_FLOW1;
+            //this.curMode = Modes.STOP_FLOW1;
             var res = (byte[])STOP_FLOW_COMMAND.Clone();
             res[0] = (byte)(res[0] + pistol);
             byte[] bytes = DataCommunication(res, ReceiveStopFlow);
@@ -203,6 +238,85 @@ namespace IsHubLib
                 return;
             }
             IsFlowAllowed = false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public enum Modes
+        {
+            NONE,
+            INIT,
+            POLL,
+            //STOP_POLL,
+            START_FLOW,
+            STOP_FLOW1,
+            STOP_FLOW2,
+            DOSE
+        }
+
+        public Modes CurrentMode { get { return currentMode; } set { currentMode = value; NotifyPropertyChanged("CurrentMode"); } }
+        protected Modes currentMode = Modes.NONE;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public override void OnTimerTick()
+        {
+            //
+            //switch (isHub.CurrentMode)
+            switch (currentMode)
+            {
+                case Modes.INIT:
+                    if (!IsOnline)
+                    {
+                        SendInit();
+                    }
+                    else
+                    {
+                        currentMode = Modes.POLL;
+                        goto case Modes.POLL;
+                    }
+                    break;
+
+                case Modes.POLL:
+                    SendPoll();
+                    if (IsFlowAllowed)
+                    {
+                        currentMode = Modes.DOSE;
+                    }
+                    break;
+
+                case Modes.START_FLOW:
+                    if (!IsFlowAllowed)
+                        SendStartFlow(CurPistol);
+                    else
+                    {
+                        currentMode = Modes.DOSE;
+                    }
+                    break;
+
+                case Modes.DOSE:
+                    SendDose();
+                    if (IsFlowAllowed)
+                    {
+                        currentMode = Modes.POLL;
+                    }
+                    break;
+
+                // ОШИБКА
+                case Modes.STOP_FLOW1:
+                    SendStopFlow();
+                    currentMode = Modes.STOP_FLOW2;
+                    break;
+                case Modes.STOP_FLOW2:
+                    SendStopFlow();
+                    currentMode = Modes.POLL;
+                    break;
+
+                default:
+                    break;
+            }
         }
 
     }

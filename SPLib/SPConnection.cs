@@ -8,18 +8,6 @@ namespace SPLib
 {
     public class SPConnection
     {
-        public static string[] Ports;
-        //{
-        //    "COM1",
-        //    "COM2",
-        //    "COM3",
-        //    "COM4",
-        //    "COM5",
-        //    "COM6",
-        //    "COM7",
-        //    "COM8",
-        //};
-
         public static int[] BaudRates = 
         {
             300,
@@ -49,6 +37,7 @@ namespace SPLib
             HexDecimal
         }
 
+
         SerialPort port;
         public SerialPort Port { get { return port; } }
         public bool IsPortOpened { get { return (port != null && port.IsOpen); } }
@@ -57,40 +46,37 @@ namespace SPLib
         SendModes sendMode;
         public SendModes SendMode { get { return sendMode; } set { sendMode = value; } }
 
-        public Action<byte[]> DataReceivingHandler;
+        public Action<byte[]> DataReceivingHandler = null;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SPConnection()
         {
             this.port = new SerialPort();
             this.buffer = new List<byte[]>();
 
             this.port.DataReceived += new SerialDataReceivedEventHandler(OnDataReceived);
-
-            Ports = new string[50];
-            for (int i = 0; i < 50; i++)
-            {
-                Ports[i] = "COM" + (i + 1).ToString();
-            }
+            
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            //try
-            //{
-            //    //Thread.Sleep(500);
-            //    //string data = this.port.ReadExisting();
-            //    int length = this.port.BytesToRead;
-            //    byte[] bytes = new byte[length];
-            //    //int r = this.port.Read(bytes, 0, length);
-            //    //string data = Encoding.Default.GetString(bytes);
-            //    //tbData.Dispatcher.Invoke(new DataReceivedDeleg(DataReceived), new object[] { data });
-            //    //tbData.Dispatcher.Invoke(new DataReceivedDeleg(ReceiveData), bytes);
-            //    this.port.Read(bytes, 0, length);
-            //    //ReceiveData(bytes);
-            //    if (DataReceivingHandler != null)
-            //        DataReceivingHandler.Invoke(bytes);
-            //}
-            //catch { }
+            if (DataReceivingHandler == null) return;
+
+            try
+            {
+                //Thread.Sleep(500);
+                int length = this.port.BytesToRead;
+                byte[] bytes = new byte[length];
+                this.port.Read(bytes, 0, length);
+                //if (DataReceivingHandler != null)
+                DataReceivingHandler.Invoke(bytes);
+            }
+            catch { }
         }
 
         /// <summary>
@@ -98,8 +84,6 @@ namespace SPLib
         /// </summary>
         public void OpenPort()
         {
-            //Log.Add("Открытие порта: " + port.PortName);
-            //new OpenPortTask().Start(this, this.Dispatcher, this.port);
             try
             {
                 port.Open();
@@ -108,7 +92,6 @@ namespace SPLib
             {
                 Log.Add(ex.Message);
             }
-            //Log.Add("Результат: " + IsPortOpened);
         }
 
         /// <summary>
@@ -116,44 +99,15 @@ namespace SPLib
         /// </summary>
         public void ClosePort()
         {
-            //Log.Add("Закрытие порта: " + port.PortName);
             port.Close();
         }
 
         /// <summary>
         /// 
         /// </summary>
-        //bool AddData(string data)
-        //{
-        //    byte[] bytes = null;
-        //    if (sendMode == SendModes.Text)
-        //    {
-        //        bytes = Encoding.Default.GetBytes(data);
-        //    }
-        //    else if (sendMode == SendModes.HexDecimal)
-        //    {
-        //        try
-        //        {
-        //            bytes = Utils.ToByteHexArray(data, " ");
-        //        }
-        //        catch
-        //        {
-        //            //MessageBoxes.Warning(this, "Ошибка формата данных");
-        //            return false;
-        //        }
-
-        //    }
-        //    buffer.Add(bytes);
-        //    var s = string.Join(" ", bytes);
-        //    Log.Add("Добавлено в буфер: " + s);
-        //    return true;
-        //}
-
         public void AddData(byte[] bytes)
         {
             buffer.Add(bytes);
-            //var s = string.Join(" ", bytes);
-            //Log.Add("Добавлено в буфер: " + s);
         }
 
         /// <summary>
@@ -238,18 +192,6 @@ namespace SPLib
         /// <summary>
         /// 
         /// </summary>
-        //private void ReceiveData(byte[] bytes)
-        //{
-        //    int length = bytes.Length;
-        //    int r = this.port.Read(bytes, 0, length);
-        //    string data = "";
-        //    if (rbText.IsChecked.GetValueOrDefault())
-        //        data = Encoding.Default.GetString(bytes);
-        //    else if (rbHex.IsChecked.GetValueOrDefault())
-        //        data = Utils.ToString(bytes);
-        //    Log.Add("Принято: " + data.Trim());
-        //}
-
         public static SerialPort ClonePort(SerialPort src)
         {
             var dest = new SerialPort();
@@ -261,6 +203,9 @@ namespace SPLib
             return dest;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void SetPortSettings(SerialPort src)
         {
             port.PortName = src.PortName;
@@ -270,6 +215,9 @@ namespace SPLib
             port.Parity = src.Parity;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string ToString()
         {
             return string.Format("{0},{1},{2},{3},{4},{5},{6}", 

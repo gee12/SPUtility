@@ -34,3 +34,4 @@ D:\Projects\SPUtility\IsHubApp\obj\Debug\IsHubApp.csproj.GenerateResource.Cache
 D:\Projects\SPUtility\IsHubApp\obj\Debug\GeneratedInternalTypeHelper.g.cs
 D:\Projects\SPUtility\IsHubApp\bin\Debug\IsHubLib.dll
 D:\Projects\SPUtility\IsHubApp\bin\Debug\IsHubLib.pdb
+D:\Projects\SPUtility\IsHubApp\obj\Debug\App.baml

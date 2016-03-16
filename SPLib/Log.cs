@@ -10,7 +10,7 @@ namespace SPLib
                 System.Reflection.Assembly.GetExecutingAssembly().GetName().Name, DateTime.Now);
 
         private static bool isFirstStart = true;
-        static Action<string> LogHandler;
+        public static Action<string> LogHandler;
 
         public static void Init(string assemblyName, string logPath, bool splitLog, Action<string> logHandler = null)
         {
@@ -44,7 +44,6 @@ namespace SPLib
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="s"></param>
         public static void Add(string s, bool isNeedDataTime = true)
         {
             try

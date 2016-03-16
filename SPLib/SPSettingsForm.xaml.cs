@@ -21,12 +21,26 @@ namespace SPLib
     /// </summary>
     public partial class SPSettingsForm : Window
     {
-        public SerialPort SerialPort { get; private set; }
+        public SerialPort SP { get; private set; }
 
+        public string[] AllPorts;
+        public bool IsShowAvailablePorts { get { return cbIsAvailablePorts.IsChecked.GetValueOrDefault(); } set { cbIsAvailablePorts.IsChecked = value; PortsList(); } }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public SPSettingsForm()
         {
             InitializeComponent();
+
             //ItemsSource = Enum.GetValues(typeof(EffectStyle)).Cast<EffectStyle>();
+            //
+            this.AllPorts = new string[50];
+            for (int i = 0; i < 50; i++)
+            {
+                this.AllPorts[i] = "COM" + (i + 1).ToString();
+            }
+            IsShowAvailablePorts = true;
         }
 
         /// <summary>
@@ -37,7 +51,7 @@ namespace SPLib
             var command = e.Command;
             if (AppCommands.ApplyCommand.Equals(command))
             {
-                Close(true);
+                Apply();
             }
             else if (AppCommands.CancelCommand.Equals(command))
             {
@@ -46,6 +60,10 @@ namespace SPLib
             else if (AppCommands.TestCommand.Equals(command))
             {
                 Test();
+            }
+            else if (AppCommands.AvailablePortsCommand.Equals(command))
+            {
+                PortsList();
             }
         }
 
@@ -66,18 +84,24 @@ namespace SPLib
         {
             if (port == null)
             {
-                SerialPort = new SerialPort();
-                SerialPort.PortName = SPConnection.Ports[0];
-                SerialPort.BaudRate = SPConnection.BaudRates[0];
-                SerialPort.DataBits = SPConnection.DataBits[0];
+                SP = new SerialPort();
+                SP.PortName = this.AllPorts[0];
+                SP.BaudRate = SPConnection.BaudRates[0];
+                SP.DataBits = SPConnection.DataBits[0];
                 //SerialPort.StopBits = StopBits.None;
-                SerialPort.Parity = Parity.None;
+                SP.Parity = Parity.None;
 
-                SerialPort.ReadTimeout = 500;
-                SerialPort.WriteTimeout = 500;
+                SP.ReadTimeout = SerialPort.InfiniteTimeout;
+                SP.WriteTimeout = SerialPort.InfiniteTimeout;
             }
-            else SerialPort = port;
-            gMain.DataContext = SerialPort;
+            else SP = port;
+            gMain.DataContext = SP;
+            //cbPort.DataContext = this;
+        }
+
+        void Apply()
+        {
+            Close(true);
         }
 
         void Close(bool result)
@@ -91,8 +115,23 @@ namespace SPLib
         /// </summary>
         void Test()
         {
-            SerialPort test = SPConnection.ClonePort(this.SerialPort);
+            SerialPort test = SPConnection.ClonePort(this.SP);
             new TestTask().Start(this, this.Dispatcher, test);
+        }
+
+        void PortsList()
+        {
+            string[] ports = null;
+            if (IsShowAvailablePorts)
+            {
+                // HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\SERIALCOMM
+                ports = SerialPort.GetPortNames();
+            }
+            else
+            {
+                ports = this.AllPorts;
+            }
+            cbPort.ItemsSource = ports;
         }
 
         /// <summary>
